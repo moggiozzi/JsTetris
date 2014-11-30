@@ -1,265 +1,301 @@
 ﻿<!doctype html>
 <html>
-    <head>
-        <title>Tetris</title>
-        <meta charset='utf-8' />
-        <script src="./scripts/scripts.js"></script>
-    </head>
-    <body onload ="initGame()" onkeydown="keyDown()" onmousedown="mouseDown()">
-        <canvas id='myCanvas' height='600' width='512'>Not support</canvas>
-        <script>
-            var N = 32; // количество строк
-            var M = 16; // количество столбцов
-            var cellWidth = 16, cellHeight = 16;
-            var gameBoard;
-            var gameBoardPosX = 32;
-            var gameBoardPosY = 32;
-            var nextFigure;
-            var currentFigure;
-            var speed = 1.0; // скорость спуска фигуры (ячеек в секунду)
-            var showFps = true;
-            
-            var drawContext;
+<head>
+    <title>Tetris</title>
+    <meta charset='utf-8' />
+    <script src="./scripts/scripts.js"></script>
+</head>
+<body onload="initGame()" onkeydown="keyDown()" onmousedown="mouseDown()">
+    <canvas id='myCanvas' height='600' width='512'>Not support</canvas>
+    <script>
+        var N = 32; // количество строк
+        var M = 16; // количество столбцов
+        var cellWidth = 16, cellHeight = 16;
+        var gameBoard;
+        var gameBoardPosX = 32;
+        var gameBoardPosY = 32;
+        var nextFigure;
+        var currentFigure;
+        var speed = 1.0; // скорость спуска фигуры (ячеек в секунду)
+        var showFps = true;
 
-            var MAX_COLOR_CODE = 4;
-            function getColor(colorCode) {
-                switch (colorCode) {
-                    case 1:
-                        return "#FF0000";
-                    case 2:
-                        return "#00FF00";
-                    case 3:
-                        return "#0000FF";
-                    case 4:
-                        return "#00FFFF";
-                    default:
-                        return "#D0D0D0";
-                }
+        var drawContext;
+
+        var MAX_COLOR_CODE = 6;
+        var COLOR_CODE_BLACK = 7;
+        function getColor(colorCode) {
+            switch (colorCode) {
+                case 1:
+                    return "#FF0000";
+                case 2:
+                    return "#00FF00";
+                case 3:
+                    return "#0000FF";
+                case 4:
+                    return "#FFFF00";
+                case 5:
+                    return "#FF00FF";
+                case 6:
+                    return "#00FFFF";
+                case COLOR_CODE_BLACK:
+                    return "#808080";
+                default:
+                    return "#D0D0D0";
             }
+        }
 
-            var FIGURE_CODE_CUBE   = 0;
-            var FIGURE_CODE_LINE   = 1;
-            var FIGURE_CODE_VISOR1 = 2;
-            var FIGURE_CODE_VISOR2 = 3;
-            var FIGURE_CODE_STAIR1 = 4;
-            var FIGURE_CODE_STAIR2 = 5;
-            var FIGURE_CODE_LEDGE  = 6;
-            var MAX_FIGURE_CODE = 6;
-            function Figure(figureCode, colorCode) {
-                this.code = figureCode;
-                this.colorCode = colorCode;
-                // координаты появления
-                this.j = Math.floor((M - 3) / 2);
-                this.i = 0; // todo -2
-                var c = colorCode;
-                switch (figureCode) {
-                    case FIGURE_CODE_LINE:
-                        this.data = [
-                            [0, c, 0],
-                            [0, c, 0],
-                            [0, c, 0],
-                        ];
-                        break;
-                    case FIGURE_CODE_VISOR1:
-                        this.data = [
-                            [0, c, c],
-                            [0, c, 0],
-                            [0, c, 0],
-                        ];
-                        break;
-                    case FIGURE_CODE_VISOR1:
-                        this.data = [
-                            [c, c, 0],
-                            [0, c, 0],
-                            [0, c, 0],
-                        ];
-                        break;
-                    case FIGURE_CODE_STAIR1:
-                        this.data = [
-                            [0, 0, c],
-                            [0, c, c],
-                            [0, c, 0],
-                        ];
-                        break;
-                    case FIGURE_CODE_STAIR2:
-                        this.data = [
-                            [c, 0, 0],
-                            [c, c, 0],
-                            [0, c, 0],
-                        ];
-                        break;
-                    case FIGURE_CODE_LEDGE:
-                        this.data = [
-                            [0, c, 0],
-                            [0, c, c],
-                            [0, c, 0],
-                        ];
-                        break;
+        var FIGURE_CODE_CUBE = 0;
+        var FIGURE_CODE_LINE = 1;
+        var FIGURE_CODE_VISOR1 = 2;
+        var FIGURE_CODE_VISOR2 = 3;
+        var FIGURE_CODE_STAIR1 = 4;
+        var FIGURE_CODE_STAIR2 = 5;
+        var FIGURE_CODE_LEDGE = 6;
+        var MAX_FIGURE_CODE = 6;
+        function Figure(figureCode, colorCode) {
+            this.code = figureCode;
+            this.colorCode = colorCode;
+            // координаты появления
+            this.j = Math.floor((M - 3) / 2);
+            this.i = 0; // todo -2
+            var c = colorCode;
+            switch (figureCode) {
+                case FIGURE_CODE_LINE:
+                    this.data = [
+                        [0, c, 0],
+                        [0, c, 0],
+                        [0, c, 0],
+                    ];
+                    break;
+                case FIGURE_CODE_VISOR1:
+                    this.data = [
+                        [0, c, c],
+                        [0, c, 0],
+                        [0, c, 0],
+                    ];
+                    break;
+                case FIGURE_CODE_VISOR1:
+                    this.data = [
+                        [c, c, 0],
+                        [0, c, 0],
+                        [0, c, 0],
+                    ];
+                    break;
+                case FIGURE_CODE_STAIR1:
+                    this.data = [
+                        [0, 0, c],
+                        [0, c, c],
+                        [0, c, 0],
+                    ];
+                    break;
+                case FIGURE_CODE_STAIR2:
+                    this.data = [
+                        [c, 0, 0],
+                        [c, c, 0],
+                        [0, c, 0],
+                    ];
+                    break;
+                case FIGURE_CODE_LEDGE:
+                    this.data = [
+                        [0, c, 0],
+                        [0, c, c],
+                        [0, c, 0],
+                    ];
+                    break;
                     //case FIGURE_CODE_CUBE:
-                    default:
-                        this.data = [
-                            [0, 0, 0],
-                            [0, c, c],
-                            [0, c, c],
-                        ];
-                        break;
-                }
+                default:
+                    this.data = [
+                        [0, 0, 0],
+                        [0, c, c],
+                        [0, c, c],
+                    ];
+                    break;
             }
-            function copyFigure(figureDst, figureSrc) {
-                figureDst.code = figureSrc.code;
-                figureDst.j = figureSrc.j;
-                figureDst.i = figureSrc.i;
-                var i,j;
-                for(i=0;i<3;++i)
-                    for(j=0;j<3;++j)
-                        figureDst.data[i][j] = figureSrc.data[i][j];
-            }
+        }
+        function copyFigure(figureDst, figureSrc) {
+            figureDst.code = figureSrc.code;
+            figureDst.j = figureSrc.j;
+            figureDst.i = figureSrc.i;
+            var i, j;
+            for (i = 0; i < 3; ++i)
+                for (j = 0; j < 3; ++j)
+                    figureDst.data[i][j] = figureSrc.data[i][j];
+        }
 
-            function initGame() {
-                var canvas = document.getElementById("myCanvas");
-                drawContext = canvas.getContext('2d');
-                var i, j;
-                gameBoard = new Array(N);
-                for (i = 0; i < N; ++i) {
-                    gameBoard[i] = new Array(M);
-                    for (j = 0; j < M; ++j)
-                        gameBoard[i][j] = 0;
-                }
-                // добавим "рамку" чтоб не проверять граничные условия
-                for (i = 0; i < N; ++i) 
-                    gameBoard[i][0] = gameBoard[i][M-1] = 1;
+        function initGame() {
+            var canvas = document.getElementById("myCanvas");
+            drawContext = canvas.getContext('2d');
+            var i, j;
+            gameBoard = new Array(N);
+            for (i = 0; i < N; ++i) {
+                gameBoard[i] = new Array(M);
                 for (j = 0; j < M; ++j)
-                    gameBoard[N - 1][j] = 1;
-                currentFigure = new Figure(
-                    Math.round(Math.random() * MAX_FIGURE_CODE),
-                    Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-                nextFigure = new Figure(
-                    Math.round(Math.random() * MAX_FIGURE_CODE),
-                    Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-                setInterval(doStep, 1000);
-                setInterval(draw, 1000 / 30);
+                    gameBoard[i][j] = 0;
             }
+            // добавим "рамку" чтоб не проверять граничные условия
+            for (i = 0; i < N; ++i)
+                gameBoard[i][0] = gameBoard[i][M - 1] = COLOR_CODE_BLACK;
+            for (j = 0; j < M; ++j)
+                gameBoard[N - 1][j] = COLOR_CODE_BLACK;
 
-            function doStep() {
-                if (tryMove(currentFigure, 1, 0) == false) {
-                    // "положить" фигуру на поле
-                    var i, j;
-                    for (i = 0; i < 3; ++i)
-                        for (j = 0; j < 3; ++j) {
-                            if (currentFigure.data[i][j] != 0)
-                                gameBoard[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
-                        }
-                    currentFigure = nextFigure;
-                    nextFigure = new Figure(
-                        Math.round(Math.random() * MAX_FIGURE_CODE),
-                        Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-                }
-            }
+            currentFigure = new Figure(
+                Math.round(Math.random() * MAX_FIGURE_CODE),
+                Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+            nextFigure = new Figure(
+                Math.round(Math.random() * MAX_FIGURE_CODE),
+                Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+            setInterval(doStep, 1000);
+            setInterval(draw, 1000 / 30);
+        }
 
-            function checkOverlap(figure) {
+        function doStep() {
+            if (tryMove(currentFigure, 1, 0) == false) {
+                // "положить" фигуру на поле
                 var i, j;
                 for (i = 0; i < 3; ++i)
                     for (j = 0; j < 3; ++j) {
-                        if (figure.data[i][j] != 0 && gameBoard[figure.i + i][figure.j + j] != 0)
-                            return true;
+                        if (currentFigure.data[i][j] != 0)
+                            gameBoard[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
                     }
-                return false;
+                currentFigure = nextFigure;
+                nextFigure = new Figure(
+                    Math.round(Math.random() * MAX_FIGURE_CODE),
+                    Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
             }
-
-            function tryMove(figure,di,dj) {
-                var movedFigure = new Figure();
-                copyFigure(movedFigure, figure);
-                movedFigure.i += di;
-                movedFigure.j += dj;
-                if (checkOverlap(movedFigure) == false) {
-                    figure.i = movedFigure.i;
-                    figure.j = movedFigure.j;
-                    return true;
+            doClear();
+        }
+        function doClear() {
+            for (i = N - 2; i > 1;) {
+                var isFullLine = true;
+                var isEmptyLine = true;
+                for (j = 1; j < M - 1; ++j) {
+                    if (gameBoard[i][j] == 0)
+                        isFullLine = false;
+                    else
+                        isEmptyLine = false;
                 }
-                return false;
-            }
-
-            function tryTurn(figure) {
-                if (figure.code == FIGURE_CODE_CUBE)
-                    return false;
-                var turnedFigure = new Figure();
-                copyFigure( turnedFigure, figure );
-                var i,j;
-                for(i=0;i<3;++i)
-                    for(j=0;j<3;++j)
-                        turnedFigure.data[i][j] = figure.data[2-j][i];
-                if (checkOverlap(turnedFigure) == false) {
-                    for (i = 0; i < 3; ++i)
-                        for (j = 0; j < 3; ++j)
-                            figure.data[i][j] = turnedFigure.data[i][j];
+                if (isEmptyLine)
+                    break;
+                if (isFullLine) {
+                    var k;
+                    for (k = i; k > 0; --k)
+                        gameBoard[k] = gameBoard[k - 1].slice();
+                    for (j = 1; j < M - 1; ++j)
+                        gameBoard[0][j] = 0;
+                } else {
+                    --i;
                 }
             }
+        }
 
-            function drawBoard() {
-                var i, j;
-                for (i = 0; i < N; ++i) {
-                    for (j = 0; j < M; ++j) {
-                        drawContext.fillStyle = getColor(gameBoard[i][j]);
+        function checkOverlap(figure) {
+            var i, j;
+            for (i = 0; i < 3; ++i)
+                for (j = 0; j < 3; ++j) {
+                    if (figure.data[i][j] != 0 && gameBoard[figure.i + i][figure.j + j] != 0)
+                        return true;
+                }
+            return false;
+        }
+
+        function tryMove(figure, di, dj) {
+            var movedFigure = new Figure();
+            copyFigure(movedFigure, figure);
+            movedFigure.i += di;
+            movedFigure.j += dj;
+            if (checkOverlap(movedFigure) == false) {
+                figure.i = movedFigure.i;
+                figure.j = movedFigure.j;
+                return true;
+            }
+            return false;
+        }
+
+        function tryTurn(figure) {
+            if (figure.code == FIGURE_CODE_CUBE)
+                return false;
+            var turnedFigure = new Figure();
+            copyFigure(turnedFigure, figure);
+            var i, j;
+            for (i = 0; i < 3; ++i)
+                for (j = 0; j < 3; ++j)
+                    turnedFigure.data[i][j] = figure.data[2 - j][i];
+            if (checkOverlap(turnedFigure) == false) {
+                for (i = 0; i < 3; ++i)
+                    for (j = 0; j < 3; ++j)
+                        figure.data[i][j] = turnedFigure.data[i][j];
+            }
+        }
+
+        function drawBoard() {
+            var i, j;
+            for (i = 0; i < N; ++i) {
+                for (j = 0; j < M; ++j) {
+                    drawContext.fillStyle = getColor(gameBoard[i][j]);
+                    if (gameBoard[i][j] != 0)
                         drawContext.fillRect(
                             gameBoardPosX + j * cellHeight,
                             gameBoardPosY + i * cellWidth, cellWidth - 1, cellHeight - 1);
-                    }
+                    else
+                        drawContext.fillRect(
+                            gameBoardPosX + j * cellHeight,
+                            gameBoardPosY + i * cellWidth, cellWidth, cellHeight);
                 }
             }
+        }
 
-            var lastLoop = new Date;
-            function drawFps() {
-                var thisLoop = new Date;
-                var fps = 1000 / (thisLoop - lastLoop);
-                lastLoop = thisLoop;
-                drawContext.fillStyle = "#FFFFFF";
-                drawContext.fillRect(0, 0, 500, 32);
-                drawContext.strokeText(fps.toFixed(2) + ' fps', 10, 10);
-            }
-            
-            function drawFigure(figure) {
-                drawContext.fillStyle = getColor(figure.colorCode);
-                var i, j;
-                for (i = 0; i < 3; ++i) {
-                    for (j = 0; j < 3; ++j) {
-                        if ( figure.data[i][j]!=0 )
+        var lastLoop = new Date;
+        function drawFps() {
+            var thisLoop = new Date;
+            var fps = 1000 / (thisLoop - lastLoop);
+            lastLoop = thisLoop;
+            drawContext.fillStyle = "#FFFFFF";
+            drawContext.fillRect(0, 0, 500, 32);
+            drawContext.strokeText(fps.toFixed(2) + ' fps', 10, 10);
+        }
+
+        function drawFigure(figure) {
+            drawContext.fillStyle = getColor(figure.colorCode);
+            var i, j;
+            for (i = 0; i < 3; ++i) {
+                for (j = 0; j < 3; ++j) {
+                    if (figure.data[i][j] != 0)
                         drawContext.fillRect(
                             gameBoardPosX + (figure.j + j) * cellHeight,
                             gameBoardPosY + (figure.i + i) * cellWidth, cellWidth - 1, cellHeight - 1);
-                    }
                 }
             }
-            
-            function draw() {
-                drawBoard();
-                drawFps();
-                if ( currentFigure != 0 )
-                    drawFigure(currentFigure);
-            }
+        }
 
-            var KEY_UP = 38, KEY_DOWN = 40, KEY_LEFT = 37, KEY_RIGHT = 39, KEY_ENTER = 13;
-            function keyDown() {
-                switch(event.keyCode)
-                {
-                    case KEY_UP:
-                        tryTurn( currentFigure );
-                        break;
-                    case KEY_DOWN:
-                        tryMove(currentFigure, 1, 0);
-                        break;
-                    case KEY_LEFT:
-                        tryMove(currentFigure, 0, -1);
-                        break;
-                    case KEY_RIGHT:
-                        tryMove(currentFigure, 0, 1);
-                        break;
-                }
-            }
-            var MB_LEFT = 1;
-            function mouseDown() {
-                if (event.button == MB_LEFT)
+        function draw() {
+            drawBoard();
+            drawFps();
+            if (currentFigure != 0)
+                drawFigure(currentFigure);
+        }
+
+        var KEY_UP = 38, KEY_DOWN = 40, KEY_LEFT = 37, KEY_RIGHT = 39, KEY_ENTER = 13;
+        function keyDown() {
+            switch (event.keyCode) {
+                case KEY_UP:
                     tryTurn(currentFigure);
+                    break;
+                case KEY_DOWN:
+                    tryMove(currentFigure, 1, 0);
+                    break;
+                case KEY_LEFT:
+                    tryMove(currentFigure, 0, -1);
+                    break;
+                case KEY_RIGHT:
+                    tryMove(currentFigure, 0, 1);
+                    break;
             }
-        </script>
-    </body>
+        }
+        var MB_LEFT = 1;
+        function mouseDown() {
+            if (event.button == MB_LEFT)
+                tryTurn(currentFigure);
+        }
+    </script>
+</body>
 </html>
