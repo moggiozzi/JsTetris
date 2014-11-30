@@ -12,13 +12,16 @@
         var M = 16; // количество столбцов
         var cellWidth = 16, cellHeight = 16;
         var gameBoard;
-        var gameBoardPosX = 32;
-        var gameBoardPosY = 32;
+        var gameBoardPosX;
+        var gameBoardPosY;
+        var gameState;
         var nextFigure;
         var currentFigure;
-        var speed = 1.0; // скорость спуска фигуры (ячеек в секунду)
+        var speed = 3.0; // скорость спуска фигуры (ячеек / в секунду)
         var showFps = true;
+        var score = 0;
 
+        var myCanvas;
         var drawContext;
 
         var MAX_COLOR_CODE = 6;
@@ -122,9 +125,12 @@
                     figureDst.data[i][j] = figureSrc.data[i][j];
         }
 
+        var GAME_STATE_MENU = 0, GAME_STATE_PLAY = 1, GAME_STATE_END = 2;
         function initGame() {
-            var canvas = document.getElementById("myCanvas");
-            drawContext = canvas.getContext('2d');
+            myCanvas = document.getElementById("myCanvas");
+            drawContext = myCanvas.getContext('2d');
+            gameBoardPosX = (myCanvas.width - cellWidth * M) / 2;
+            gameBoardPosY = 32;
             var i, j;
             gameBoard = new Array(N);
             for (i = 0; i < N; ++i) {
@@ -144,11 +150,16 @@
             nextFigure = new Figure(
                 Math.round(Math.random() * MAX_FIGURE_CODE),
                 Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-            setInterval(doStep, 1000);
-            setInterval(draw, 1000 / 30);
+
+            gameState = GAME_STATE_MENU;
+
+            setInterval(doStep, 1000 / speed);
+            setInterval(draw, 1000 / 30); // 30 fps
         }
 
         function doStep() {
+            if (gameState != GAME_STATE_PLAY)
+                return;
             if (tryMove(currentFigure, 1, 0) == false) {
                 // "положить" фигуру на поле
                 var i, j;
@@ -161,10 +172,13 @@
                 nextFigure = new Figure(
                     Math.round(Math.random() * MAX_FIGURE_CODE),
                     Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+                if (tryMove(currentFigure, 1, 0) == false)
+                    gameState = GAME_STATE_END;
             }
             doClear();
         }
         function doClear() {
+            var addScore = 0;
             for (i = N - 2; i > 1;) {
                 var isFullLine = true;
                 var isEmptyLine = true;
@@ -182,10 +196,12 @@
                         gameBoard[k] = gameBoard[k - 1].slice();
                     for (j = 1; j < M - 1; ++j)
                         gameBoard[0][j] = 0;
+                    addScore += 2 * addScore + 1;
                 } else {
                     --i;
                 }
             }
+            score += addScore;
         }
 
         function checkOverlap(figure) {
@@ -245,13 +261,18 @@
         }
 
         var lastLoop = new Date;
-        function drawFps() {
-            var thisLoop = new Date;
-            var fps = 1000 / (thisLoop - lastLoop);
-            lastLoop = thisLoop;
+        function drawInfo() {
             drawContext.fillStyle = "#FFFFFF";
             drawContext.fillRect(0, 0, 500, 32);
-            drawContext.strokeText(fps.toFixed(2) + ' fps', 10, 10);
+            var info = "";
+            if (showFps) {
+                var thisLoop = new Date;
+                var fps = 1000 / (thisLoop - lastLoop);
+                lastLoop = thisLoop;
+                info = fps.toFixed(2) + ' fps ';
+            }
+            info += ' Score: ' + score;
+            drawContext.strokeText(info, gameBoardPosX, 20);
         }
 
         function drawFigure(figure) {
@@ -268,33 +289,67 @@
         }
 
         function draw() {
-            drawBoard();
-            drawFps();
-            if (currentFigure != 0)
-                drawFigure(currentFigure);
+            switch (gameState) {
+                case GAME_STATE_MENU:
+                    {
+                        drawBoard();
+                        drawContext.font = "32px Arial";
+                        drawContext.textAlign = "center";
+                        var str = "Press to start.";
+                        drawContext.strokeText(str, myCanvas.width / 2, myCanvas.height / 2);
+                    } break;
+                case GAME_STATE_PLAY:
+                    {
+                        drawContext.font = "16px Arial";
+                        drawContext.textAlign = "left";
+                        drawBoard();
+                        drawInfo();
+                        drawFigure(currentFigure);
+                    } break;
+                case GAME_STATE_END:
+                    {
+                        drawContext.font = "32px Arial";
+                        drawContext.textAlign = "center";
+                        var str = "You result: " + score;
+                        drawContext.strokeText(str, myCanvas.width / 2, myCanvas.height / 2);
+                    } break;
+            }
         }
-
         var KEY_UP = 38, KEY_DOWN = 40, KEY_LEFT = 37, KEY_RIGHT = 39, KEY_ENTER = 13;
         function keyDown() {
-            switch (event.keyCode) {
-                case KEY_UP:
-                    tryTurn(currentFigure);
-                    break;
-                case KEY_DOWN:
-                    tryMove(currentFigure, 1, 0);
-                    break;
-                case KEY_LEFT:
-                    tryMove(currentFigure, 0, -1);
-                    break;
-                case KEY_RIGHT:
-                    tryMove(currentFigure, 0, 1);
-                    break;
+            switch (gameState) {
+                case GAME_STATE_MENU:
+                    {
+                        gameState = GAME_STATE_PLAY;
+                    } break;
+                case GAME_STATE_PLAY:
+                    {
+                        switch (event.keyCode) {
+                            case KEY_UP:
+                                tryTurn(currentFigure);
+                                break;
+                            case KEY_DOWN:
+                                tryMove(currentFigure, 1, 0);
+                                break;
+                            case KEY_LEFT:
+                                tryMove(currentFigure, 0, -1);
+                                break;
+                            case KEY_RIGHT:
+                                tryMove(currentFigure, 0, 1);
+                                break;
+                        }
+                    } break;
+                case GAME_STATE_END:
+                    {
+                        initGame();
+                        gameState = GAME_STATE_MENU;
+                    } break;
             }
         }
         var MB_LEFT = 1;
         function mouseDown() {
-            if (event.button == MB_LEFT)
-                tryTurn(currentFigure);
+            //if (event.button == MB_LEFT)
+            tryTurn(currentFigure);
         }
     </script>
 </body>
