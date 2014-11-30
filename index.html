@@ -5,8 +5,8 @@
         <meta charset='utf-8' />
         <script src="./scripts/scripts.js"></script>
     </head>
-    <body onload ="initGame()" onkeydown="keyDown()">
-        <canvas id='myCanvas' height='800' width='512'>Not support</canvas>
+    <body onload ="initGame()" onkeydown="keyDown()" onmousedown="mouseDown()">
+        <canvas id='myCanvas' height='600' width='512'>Not support</canvas>
         <script>
             var N = 32; // количество строк
             var M = 16; // количество столбцов
@@ -130,16 +130,14 @@
                     gameBoard[i][0] = gameBoard[i][M-1] = 1;
                 for (j = 0; j < M; ++j)
                     gameBoard[N - 1][j] = 1;
-                //gameBoard[4][7] = 1;
                 currentFigure = new Figure(
                     Math.round(Math.random() * MAX_FIGURE_CODE),
                     Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
                 nextFigure = new Figure(
                     Math.round(Math.random() * MAX_FIGURE_CODE),
                     Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-                var speed = 500;
-                setInterval(doStep, speed);
-                setInterval(draw, speed);
+                setInterval(doStep, 1000);
+                setInterval(draw, 1000 / 30);
             }
 
             function doStep() {
@@ -239,7 +237,7 @@
                     drawFigure(currentFigure);
             }
 
-            var KEY_UP = 38, KEY_DOWN = 40, KEY_LEFT = 37, KEY_RIGHT = 39;
+            var KEY_UP = 38, KEY_DOWN = 40, KEY_LEFT = 37, KEY_RIGHT = 39, KEY_ENTER = 13;
             function keyDown() {
                 switch(event.keyCode)
                 {
@@ -256,6 +254,11 @@
                         tryMove(currentFigure, 0, 1);
                         break;
                 }
+            }
+            var MB_LEFT = 1;
+            function mouseDown() {
+                if (event.button == MB_LEFT)
+                    tryTurn(currentFigure);
             }
         </script>
     </body>
