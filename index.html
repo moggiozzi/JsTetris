@@ -10,22 +10,22 @@
     <script>
         var N = 32; // количество строк
         var M = 16; // количество столбцов
-        var cellWidth = 16, cellHeight = 16;
+        var cellWidth, cellHeight;
         var gameBoard;
-        var gameBoardPosX;
-        var gameBoardPosY;
+        var gameBoardPosX, gameBoardPosY;
         var gameState;
-        var nextFigure;
-        var currentFigure;
+        var currentFigure, nextFigure;
         var speed = 3.0; // скорость спуска фигуры (ячеек / в секунду)
         var showFps = true;
         var score = 0;
 
-        var myCanvas;
-        var drawContext;
+        var myCanvas = document.getElementById("myCanvas");
+        var drawContext = myCanvas.getContext('2d');
 
         var MAX_COLOR_CODE = 6;
-        var COLOR_CODE_BLACK = 7;
+        var COLOR_CODE_GRAY = 7; var COLOR_GRAY = "#808080";
+        var COLOR_BLUE = "#0000FF";
+        var COLOR_BLACK = "#000000";
         function getColor(colorCode) {
             switch (colorCode) {
                 case 1:
@@ -33,15 +33,15 @@
                 case 2:
                     return "#00FF00";
                 case 3:
-                    return "#0000FF";
+                    return COLOR_BLUE;
                 case 4:
                     return "#FFFF00";
                 case 5:
                     return "#FF00FF";
                 case 6:
                     return "#00FFFF";
-                case COLOR_CODE_BLACK:
-                    return "#808080";
+                case COLOR_CODE_GRAY:
+                    return COLOR_GRAY;
                 default:
                     return "#D0D0D0";
             }
@@ -77,7 +77,7 @@
                         [0, c, 0],
                     ];
                     break;
-                case FIGURE_CODE_VISOR1:
+                case FIGURE_CODE_VISOR2:
                     this.data = [
                         [c, c, 0],
                         [0, c, 0],
@@ -128,7 +128,14 @@
         var GAME_STATE_MENU = 0, GAME_STATE_PLAY = 1, GAME_STATE_END = 2;
         function initGame() {
             myCanvas = document.getElementById("myCanvas");
+            myCanvas.width = document.body.clientWidth;
+            myCanvas.height = document.body.clientHeight;
+            if (myCanvas.width < myCanvas.height)
+                cellWidth = cellHeight = Math.ceil( myCanvas.width / M );
+            else
+                cellWidth = cellHeight = Math.ceil( (myCanvas.height - 32) / N );
             drawContext = myCanvas.getContext('2d');
+
             gameBoardPosX = (myCanvas.width - cellWidth * M) / 2;
             gameBoardPosY = 32;
             var i, j;
@@ -140,9 +147,9 @@
             }
             // добавим "рамку" чтоб не проверять граничные условия
             for (i = 0; i < N; ++i)
-                gameBoard[i][0] = gameBoard[i][M - 1] = COLOR_CODE_BLACK;
+                gameBoard[i][0] = gameBoard[i][M - 1] = COLOR_CODE_GRAY;
             for (j = 0; j < M; ++j)
-                gameBoard[N - 1][j] = COLOR_CODE_BLACK;
+                gameBoard[N - 1][j] = COLOR_CODE_GRAY;
 
             currentFigure = new Figure(
                 Math.round(Math.random() * MAX_FIGURE_CODE),
@@ -172,8 +179,10 @@
                 nextFigure = new Figure(
                     Math.round(Math.random() * MAX_FIGURE_CODE),
                     Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-                if (tryMove(currentFigure, 1, 0) == false)
+                if (tryMove(currentFigure, 1, 0) == false) {
+                    currentFigure.i--;
                     gameState = GAME_STATE_END;
+                }
             }
             doClear();
         }
@@ -262,17 +271,18 @@
 
         var lastLoop = new Date;
         function drawInfo() {
-            drawContext.fillStyle = "#FFFFFF";
-            drawContext.fillRect(0, 0, 500, 32);
+            drawContext.fillStyle = COLOR_GRAY;
+            drawContext.fillRect( gameBoardPosX, 0, cellWidth * M - 1, 32);
             var info = "";
             if (showFps) {
                 var thisLoop = new Date;
                 var fps = 1000 / (thisLoop - lastLoop);
                 lastLoop = thisLoop;
-                info = fps.toFixed(2) + ' fps ';
+                info = fps.toFixed(1) + ' fps ';
             }
             info += ' Score: ' + score;
-            drawContext.strokeText(info, gameBoardPosX, 20);
+            drawContext.fillStyle = COLOR_BLACK;
+            drawContext.fillText(info, gameBoardPosX, 20);
         }
 
         function drawFigure(figure) {
@@ -293,14 +303,14 @@
                 case GAME_STATE_MENU:
                     {
                         drawBoard();
-                        drawContext.font = "32px Arial";
+                        drawContext.fillStyle = COLOR_BLACK;
+                        drawContext.font = "24px Arial";
                         drawContext.textAlign = "center";
                         var str = "Press to start.";
-                        drawContext.strokeText(str, myCanvas.width / 2, myCanvas.height / 2);
+                        drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
                     } break;
                 case GAME_STATE_PLAY:
                     {
-                        drawContext.font = "16px Arial";
                         drawContext.textAlign = "left";
                         drawBoard();
                         drawInfo();
@@ -308,10 +318,10 @@
                     } break;
                 case GAME_STATE_END:
                     {
-                        drawContext.font = "32px Arial";
+                        drawContext.fillStyle = COLOR_BLACK;
                         drawContext.textAlign = "center";
                         var str = "You result: " + score;
-                        drawContext.strokeText(str, myCanvas.width / 2, myCanvas.height / 2);
+                        drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
                     } break;
             }
         }

@@ -1,0 +1,10 @@
+{
+    "id": "roarbo004",
+    "version": "0.0.4",
+    "vendor": "Roarbo",
+    "type": "web",
+    "main": "index.html",
+    "title": "Tetris",
+    "icon": "icon.png",
+    "largeIcon": "largeIcon.png"
+}
