@@ -47,6 +47,7 @@
             var MAX_FIGURE_CODE = 6;
             function Figure(figureCode, colorCode) {
                 this.code = figureCode;
+                this.colorCode = colorCode;
                 // координаты появления
                 this.j = Math.floor((M - 3) / 2);
                 this.i = 0; // todo -2
@@ -124,9 +125,8 @@
                     for (j = 0; j < M; ++j)
                         gameBoard[i][j] = 0;
                 }
-                setInterval(doStep, 2000);
-                setInterval(drawBoard, 1000);
-                setInterval(drawFps, 1000);
+                setInterval(doStep, 1000);
+                setInterval(draw, 1000);
             }
 
             function doStep() {
@@ -141,12 +141,19 @@
                         Math.round( Math.random() * MAX_FIGURE_CODE ),
                         Math.round( Math.random() * MAX_COLOR_CODE));
                 }
-                var i, j;
-                for (i = 0; i < 3; ++i)
-                    for (j = 0; j < 3; ++j) {
-                        if ( currentFigure.data[i][j] != 0 )
-                            gameBoard[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
-                    }
+                if (canMove(currentFigure)) {
+                    currentFigure.i += 1;
+                }
+                else {
+                    // "положить" фигуру на поле
+                    var i, j;
+                    for (i = 0; i < 3; ++i)
+                        for (j = 0; j < 3; ++j) {
+                            if (currentFigure.data[i][j] != 0)
+                                gameBoard[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
+                        }
+                    currentFigure = null;
+                }
             }
 
             function checkOverlap(figure) {
@@ -160,7 +167,10 @@
             }
 
             function canMove(figure) {
-
+                var movedFigure = new Figure();
+                copyFigure(movedFigure, figure);
+                movedFigure.i += 1;
+                return checkOverlap(movedFigure) != true;
             }
 
             function canTurn(figure) {
@@ -192,10 +202,28 @@
                 var thisLoop = new Date;
                 var fps = 1000 / (thisLoop - lastLoop);
                 lastLoop = thisLoop;
-                // получили сколько кадров в секунду
-                drawContext.fillStyle = "#FFFFFF";// getColor(gameBoard[i][j]);
+                drawContext.fillStyle = "#FFFFFF";
                 drawContext.fillRect(0, 0, 500, 32);
-                drawContext.strokeText(fps.toFixed(2) + ' fps', 10, 10);// .fillText(fps.toString(), 100, 100);
+                drawContext.strokeText(fps.toFixed(2) + ' fps', 10, 10);
+            }
+            
+            function drawFigure(figure) {
+                drawContext.fillStyle = getColor(figure.colorCode);
+                var i, j;
+                for (i = 0; i < 3; ++i) {
+                    for (j = 0; j < 3; ++j) {
+                        if ( figure.data[i][j]!=0 )
+                        drawContext.fillRect(
+                            gameBoardPosX + (figure.j + j) * cellHeight,
+                            gameBoardPosY + (figure.i + i) * cellWidth, cellWidth - 1, cellHeight - 1);
+                    }
+                }
+            }
+            
+            function draw() {
+                drawBoard();
+                drawFps();
+                drawFigure(currentFigure);
             }
         </script>
     </body>
