@@ -4,9 +4,28 @@
     <title>Tetris</title>
     <meta charset='utf-8' />
     <script src="./scripts/scripts.js"></script>
+        <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+        canvas {
+            background: #CCC;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
-<body onload="initGame()" onkeydown="keyDown()" onmousedown="mouseDown()">
-    <canvas id='myCanvas' height='600' width='512'>Not support</canvas>
+<body onload="initGame()" onkeydown="keyDown()" onmousedown="mouseDown()" onresize="resizeCanvas()">
+    <canvas id='myCanvas' height='1080' width='1920'>Not support</canvas>
     <script>
         var N = 32; // количество строк
         var M = 16; // количество столбцов
@@ -124,20 +143,19 @@
                 for (j = 0; j < 3; ++j)
                     figureDst.data[i][j] = figureSrc.data[i][j];
         }
-
+        function resizeCanvas() {
+            myCanvas.width = window.innerWidth;
+            myCanvas.height = window.innerHeight;
+            cellWidth = cellHeight = Math.floor(Math.min(myCanvas.width / M, (myCanvas.height) / (N+2)));
+            drawContext.font = cellWidth.toString() + 'px Arial';
+            gameBoardPosX = (myCanvas.width - cellWidth * M) / 2;
+            gameBoardPosY = cellHeight*2;
+        }
         var GAME_STATE_MENU = 0, GAME_STATE_PLAY = 1, GAME_STATE_END = 2;
         function initGame() {
             myCanvas = document.getElementById("myCanvas");
-            myCanvas.width = document.body.clientWidth;
-            myCanvas.height = document.body.clientHeight;
-            if (myCanvas.width < myCanvas.height)
-                cellWidth = cellHeight = Math.ceil( myCanvas.width / M );
-            else
-                cellWidth = cellHeight = Math.ceil( (myCanvas.height - 32) / N );
             drawContext = myCanvas.getContext('2d');
-
-            gameBoardPosX = (myCanvas.width - cellWidth * M) / 2;
-            gameBoardPosY = 32;
+            resizeCanvas();   
             var i, j;
             gameBoard = new Array(N);
             for (i = 0; i < N; ++i) {
@@ -253,6 +271,9 @@
         }
 
         function drawBoard() {
+            drawContext.fillStyle = COLOR_GRAY;
+            drawContext.fillRect(gameBoardPosX, 0, cellWidth * M - 1, cellHeight * 2);
+
             var i, j;
             for (i = 0; i < N; ++i) {
                 for (j = 0; j < M; ++j) {
@@ -271,8 +292,6 @@
 
         var lastLoop = new Date;
         function drawInfo() {
-            drawContext.fillStyle = COLOR_GRAY;
-            drawContext.fillRect( gameBoardPosX, 0, cellWidth * M - 1, 32);
             var info = "";
             if (showFps) {
                 var thisLoop = new Date;
@@ -282,7 +301,7 @@
             }
             info += ' Score: ' + score;
             drawContext.fillStyle = COLOR_BLACK;
-            drawContext.fillText(info, gameBoardPosX, 20);
+            drawContext.fillText(info, gameBoardPosX, cellHeight);
         }
 
         function drawFigure(figure) {
@@ -304,7 +323,6 @@
                     {
                         drawBoard();
                         drawContext.fillStyle = COLOR_BLACK;
-                        drawContext.font = "24px Arial";
                         drawContext.textAlign = "center";
                         var str = "Press to start.";
                         drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
