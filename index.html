@@ -6,7 +6,7 @@
         <script src="./scripts/scripts.js"></script>
     </head>
     <body onload ="initGame()">
-        <canvas id='myCanvas' height='512' width='512'>Not support</canvas>
+        <canvas id='myCanvas' height='800' width='512'>Not support</canvas>
         <script>
             var N = 32; // количество строк
             var M = 16; // количество столбцов
@@ -125,22 +125,24 @@
                     for (j = 0; j < M; ++j)
                         gameBoard[i][j] = 0;
                 }
-                setInterval(doStep, 1000);
-                setInterval(draw, 1000);
+                // добавим "рамку" чтоб не проверять граничные условия
+                for (i = 0; i < N; ++i) 
+                    gameBoard[i][0] = gameBoard[i][M-1] = 1;
+                for (j = 0; j < M; ++j)
+                    gameBoard[N - 1][j] = 1;
+                //gameBoard[4][7] = 1;
+                currentFigure = new Figure(
+                    Math.round(Math.random() * MAX_FIGURE_CODE),
+                    Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+                nextFigure = new Figure(
+                    Math.round(Math.random() * MAX_FIGURE_CODE),
+                    Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+                var speed = 500;
+                setInterval(doStep, speed);
+                setInterval(draw, speed);
             }
 
             function doStep() {
-                if (currentFigure == null) {
-                    if (nextFigure == null) {
-                        nextFigure = new Figure(
-                            Math.round( Math.random() * MAX_FIGURE_CODE ),
-                            Math.round( Math.random() * MAX_COLOR_CODE));
-                    }
-                    currentFigure = nextFigure;
-                    nextFigure = new Figure(
-                        Math.round( Math.random() * MAX_FIGURE_CODE ),
-                        Math.round( Math.random() * MAX_COLOR_CODE));
-                }
                 if (canMove(currentFigure)) {
                     currentFigure.i += 1;
                 }
@@ -152,7 +154,10 @@
                             if (currentFigure.data[i][j] != 0)
                                 gameBoard[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
                         }
-                    currentFigure = null;
+                    currentFigure = nextFigure;
+                    nextFigure = new Figure(
+                        Math.round(Math.random() * MAX_FIGURE_CODE),
+                        Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
                 }
             }
 
@@ -160,7 +165,7 @@
                 var i, j;
                 for (i = 0; i < 3; ++i)
                     for (j = 0; j < 3; ++j) {
-                        if (currentFigure.data[i][j] != 0 && gameBoard[currentFigure.i + i][currentFigure.j + j] != 0)
+                        if (figure.data[i][j] != 0 && gameBoard[figure.i + i][figure.j + j] != 0)
                             return true;
                     }
                 return false;
@@ -223,7 +228,8 @@
             function draw() {
                 drawBoard();
                 drawFps();
-                drawFigure(currentFigure);
+                if ( currentFigure != 0 )
+                    drawFigure(currentFigure);
             }
         </script>
     </body>
