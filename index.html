@@ -5,7 +5,7 @@
         <meta charset='utf-8' />
         <script src="./scripts/scripts.js"></script>
     </head>
-    <body onload ="initGame()">
+    <body onload ="initGame()" onkeydown="keyDown()">
         <canvas id='myCanvas' height='800' width='512'>Not support</canvas>
         <script>
             var N = 32; // количество строк
@@ -178,7 +178,7 @@
                 return checkOverlap(movedFigure) != true;
             }
 
-            function canTurn(figure) {
+            function tryTurn(figure) {
                 if (figure.code == FIGURE_CODE_CUBE)
                     return false;
                 var turnedFigure = new Figure();
@@ -187,7 +187,11 @@
                 for(i=0;i<3;++i)
                     for(j=0;j<3;++j)
                         turnedFigure.data[i][j] = figure.data[2-j][i];
-                return checkOverlap(turnedFigure) != true;
+                if (checkOverlap(turnedFigure) == false) {
+                    for (i = 0; i < 3; ++i)
+                        for (j = 0; j < 3; ++j)
+                            figure.data[i][j] = turnedFigure.data[i][j];
+                }
             }
 
             function drawBoard() {
@@ -230,6 +234,22 @@
                 drawFps();
                 if ( currentFigure != 0 )
                     drawFigure(currentFigure);
+            }
+
+            var KEY_UP = 38, KEY_DOWN = 40, KEY_LEFT = 37, KEY_RIGHT = 39;
+            function keyDown() {
+                switch(event.keyCode)
+                {
+                    case KEY_UP:
+                        tryTurn( currentFigure );
+                        break;
+                    case KEY_DOWN:
+                        break;
+                    case KEY_LEFT:
+                        break;
+                    case KEY_RIGHT:
+                        break;
+                }
             }
         </script>
     </body>
