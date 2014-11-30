@@ -143,10 +143,7 @@
             }
 
             function doStep() {
-                if (canMove(currentFigure)) {
-                    currentFigure.i += 1;
-                }
-                else {
+                if (tryMove(currentFigure, 1, 0) == false) {
                     // "положить" фигуру на поле
                     var i, j;
                     for (i = 0; i < 3; ++i)
@@ -171,11 +168,17 @@
                 return false;
             }
 
-            function canMove(figure) {
+            function tryMove(figure,di,dj) {
                 var movedFigure = new Figure();
                 copyFigure(movedFigure, figure);
-                movedFigure.i += 1;
-                return checkOverlap(movedFigure) != true;
+                movedFigure.i += di;
+                movedFigure.j += dj;
+                if (checkOverlap(movedFigure) == false) {
+                    figure.i = movedFigure.i;
+                    figure.j = movedFigure.j;
+                    return true;
+                }
+                return false;
             }
 
             function tryTurn(figure) {
@@ -244,10 +247,13 @@
                         tryTurn( currentFigure );
                         break;
                     case KEY_DOWN:
+                        tryMove(currentFigure, 1, 0);
                         break;
                     case KEY_LEFT:
+                        tryMove(currentFigure, 0, -1);
                         break;
                     case KEY_RIGHT:
+                        tryMove(currentFigure, 0, 1);
                         break;
                 }
             }
