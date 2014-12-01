@@ -27,8 +27,12 @@
 <body onload="initGame()" onkeydown="keyDown()" onmousedown="mouseDown()" onresize="resizeCanvas()">
     <canvas id='myCanvas' height='1080' width='1920'>Not support</canvas>
     <script>
-        var N = 32; // количество строк
-        var M = 16; // количество столбцов
+        var dropSound = new Audio("./sounds/drop.wav");
+        var clearSound = new Audio("./sounds/clear.wav");
+        var moveSound = new Audio("./sounds/move.wav");
+
+        var N = 20; // количество строк
+        var M = 10; // количество столбцов
         var cellWidth, cellHeight;
         var gameBoard;
         var gameBoardPosX, gameBoardPosY;
@@ -186,6 +190,7 @@
             if (gameState != GAME_STATE_PLAY)
                 return;
             if (tryMove(currentFigure, 1, 0) == false) {
+                dropSound.play();
                 // "положить" фигуру на поле
                 var i, j;
                 for (i = 0; i < 3; ++i)
@@ -229,6 +234,8 @@
                 }
             }
             score += addScore;
+            if (addScore > 0)
+                clearSound.play();
         }
 
         function checkOverlap(figure) {
@@ -267,7 +274,9 @@
                 for (i = 0; i < 3; ++i)
                     for (j = 0; j < 3; ++j)
                         figure.data[i][j] = turnedFigure.data[i][j];
+                return true;
             }
+            return false;
         }
 
         function drawBoard() {
@@ -354,16 +363,20 @@
                     {
                         switch (event.keyCode) {
                             case KEY_UP:
-                                tryTurn(currentFigure);
+                                if (tryTurn(currentFigure))
+                                    moveSound.play();
                                 break;
                             case KEY_DOWN:
-                                tryMove(currentFigure, 1, 0);
+                                if (tryMove(currentFigure, 1, 0))
+                                    moveSound.play();
                                 break;
                             case KEY_LEFT:
-                                tryMove(currentFigure, 0, -1);
+                                if (tryMove(currentFigure, 0, -1))
+                                    moveSound.play();
                                 break;
                             case KEY_RIGHT:
-                                tryMove(currentFigure, 0, 1);
+                                if (tryMove(currentFigure, 0, 1))
+                                    moveSound.play();
                                 break;
                         }
                     } break;

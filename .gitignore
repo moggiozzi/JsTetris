@@ -1,1 +1,3 @@
 *.suo
+*.ipk
+Web.config
