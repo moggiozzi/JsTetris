@@ -47,13 +47,14 @@
         var showFps = true;
         var score = 0;
 
-        var MOVE_LEFT = 1, MOVE_RIGHT = 2, MOVE_DOWN = 3, MOVE_ROTATE = 4;
+        var MOVE = { LEFT: 1, RIGHT: 2, DOWN: 3, MOVE: 4 };
         var nextMove = 0;
         var myCanvas = document.getElementById("myCanvas");
         var drawContext = myCanvas.getContext('2d');
 
         var MAX_COLOR_CODE = 6;
-        var COLOR_CODE_GRAY = 7; var COLOR_GRAY = "#808080";
+        var COLOR_CODE_GRAY = 7; // серый для фона
+        var COLOR_GRAY = "#808080";
         var COLOR_BLUE = "#0000FF";
         var COLOR_BLACK = "#000000";
         function getColor(colorCode) {
@@ -77,14 +78,8 @@
             }
         }
 
-        var FIGURE_CODE_CUBE = 0;
-        var FIGURE_CODE_LINE = 1;
-        var FIGURE_CODE_VISOR1 = 2;
-        var FIGURE_CODE_VISOR2 = 3;
-        var FIGURE_CODE_STAIR1 = 4;
-        var FIGURE_CODE_STAIR2 = 5;
-        var FIGURE_CODE_LEDGE = 6;
-        var MAX_FIGURE_CODE = 6;
+        var FIGURE_CODE = { CUBE: 0, LINE: 1, VISOR1: 2, VISOR2: 3, STAIR1: 4, STAIR2: 5, LEDGE: 6 };
+        var MAX_FIGURE_CODE = 7
         function Figure(figureCode, colorCode) {
             this.code = figureCode;
             this.colorCode = colorCode;
@@ -93,49 +88,49 @@
             this.i = 0; // todo -2
             var c = colorCode;
             switch (figureCode) {
-                case FIGURE_CODE_LINE:
+                case FIGURE_CODE.LINE:
                     this.data = [
                         [0, c, 0],
                         [0, c, 0],
                         [0, c, 0],
                     ];
                     break;
-                case FIGURE_CODE_VISOR1:
+                case FIGURE_CODE.VISOR1:
                     this.data = [
                         [0, c, c],
                         [0, c, 0],
                         [0, c, 0],
                     ];
                     break;
-                case FIGURE_CODE_VISOR2:
+                case FIGURE_CODE.VISOR2:
                     this.data = [
                         [c, c, 0],
                         [0, c, 0],
                         [0, c, 0],
                     ];
                     break;
-                case FIGURE_CODE_STAIR1:
+                case FIGURE_CODE.STAIR1:
                     this.data = [
                         [0, 0, c],
                         [0, c, c],
                         [0, c, 0],
                     ];
                     break;
-                case FIGURE_CODE_STAIR2:
+                case FIGURE_CODE.STAIR2:
                     this.data = [
                         [c, 0, 0],
                         [c, c, 0],
                         [0, c, 0],
                     ];
                     break;
-                case FIGURE_CODE_LEDGE:
+                case FIGURE_CODE.LEDGE:
                     this.data = [
                         [0, c, 0],
                         [0, c, c],
                         [0, c, 0],
                     ];
                     break;
-                    //case FIGURE_CODE_CUBE:
+                    //case FIGURE_CODE.CUBE:
                 default:
                     this.data = [
                         [0, 0, 0],
@@ -162,7 +157,7 @@
             gameBoardPosX = (myCanvas.width - cellWidth * M) / 2;
             gameBoardPosY = cellHeight*2;
         }
-        var GAME_STATE_MENU = 0, GAME_STATE_PLAY = 1, GAME_STATE_END = 2;
+        var GAME_STATE = { MENU: 0, PLAY: 1, GAME_OVER: 2 };
         function initGame() {
             myCanvas = document.getElementById("myCanvas");
             drawContext = myCanvas.getContext('2d');
@@ -186,46 +181,42 @@
             nextFigure = new Figure(
                 Math.round(Math.random() * MAX_FIGURE_CODE),
                 Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-            myTimer = 0;
+            myTimer = new Date().getTime();
             lastMove = myTimer;
             lastDownMove = myTimer;
             speed = 1.0;
             score = 0;
             nextMove = 0;
 
-
-            gameState = GAME_STATE_MENU;
+            gameState = GAME_STATE.MENU;
 
             setInterval(doStep, 1000 / (2 * MAX_SPEED));
             setInterval(draw, 1000 / 30); // 30 fps
-            setInterval(incTimer, 10);
-        }
-        function incTimer() {
-            myTimer+=10;
         }
 
         function doStep() {
-            if (gameState != GAME_STATE_PLAY)
+            if (gameState != GAME_STATE.PLAY)
                 return;
             var isTryDown = false;   // была попытка подвинуть вниз
             var isMovedDown = false; // был сдвиг вниз
+            myTimer = new Date().getTime();
             if (myTimer - lastMove >= 1000 / MAX_SPEED && nextMove != 0) // команды пользователя
             {
                 switch (nextMove) {
-                    case MOVE_LEFT:
+                    case MOVE.LEFT:
                         tryMove(currentFigure, 0, -1);
                         break;
-                    case MOVE_RIGHT:
+                    case MOVE.RIGHT:
                         tryMove(currentFigure, 0, 1);
                         break;
-                    case MOVE_DOWN:
+                    case MOVE.DOWN:
                         if (tryMove(currentFigure, 1, 0)) {
                             isMovedDown = true;
                             lastDownMove = myTimer;
                         }
                         isTryDown = true;
                         break;
-                    case MOVE_ROTATE:
+                    case MOVE.ROTATE:
                         tryTurn(currentFigure);
                         break;
                 }
@@ -255,7 +246,7 @@
                     Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
                 if (tryMove(currentFigure, 1, 0) == false) {
                     currentFigure.i--;
-                    gameState = GAME_STATE_END;
+                    gameState = GAME_STATE.GAME_OVER;
                 }
                 doClear();
             }
@@ -319,7 +310,7 @@
         }
 
         function tryTurn(figure) {
-            if (figure.code == FIGURE_CODE_CUBE)
+            if (figure.code == FIGURE_CODE.CUBE)
                 return false;
             var turnedFigure = new Figure();
             copyFigure(turnedFigure, figure);
@@ -385,7 +376,7 @@
 
         function draw() {
             switch (gameState) {
-                case GAME_STATE_MENU:
+                case GAME_STATE.MENU:
                     {
                         drawBoard();
                         drawContext.fillStyle = COLOR_BLACK;
@@ -393,14 +384,14 @@
                         var str = "Press to start.";
                         drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
                     } break;
-                case GAME_STATE_PLAY:
+                case GAME_STATE.PLAY:
                     {
                         drawContext.textAlign = "left";
                         drawBoard();
                         drawInfo();
                         drawFigure(currentFigure);
                     } break;
-                case GAME_STATE_END:
+                case GAME_STATE.GAME_OVER:
                     {
                         drawContext.fillStyle = COLOR_BLACK;
                         drawContext.textAlign = "center";
@@ -412,38 +403,38 @@
         var KEY_UP = 38, KEY_DOWN = 40, KEY_LEFT = 37, KEY_RIGHT = 39, KEY_ENTER = 13;
         function keyDown() {
             switch (gameState) {
-                case GAME_STATE_MENU:
+                case GAME_STATE.MENU:
                     {
-                        gameState = GAME_STATE_PLAY;
+                        gameState = GAME_STATE.PLAY;
                     } break;
-                case GAME_STATE_PLAY:
+                case GAME_STATE.PLAY:
                     {
                         switch (event.keyCode) {
                             case KEY_UP:
-                                nextMove = MOVE_ROTATE;
+                                nextMove = MOVE.ROTATE;
                                 break;
                             case KEY_DOWN:
-                                nextMove = MOVE_DOWN;
+                                nextMove = MOVE.DOWN;
                                 break;
                             case KEY_LEFT:
-                                nextMove = MOVE_LEFT;
+                                nextMove = MOVE.LEFT;
                                 break;
                             case KEY_RIGHT:
-                                nextMove = MOVE_RIGHT;
+                                nextMove = MOVE.RIGHT;
                                 break;
                         }
                     } break;
-                case GAME_STATE_END:
+                case GAME_STATE.GAME_OVER:
                     {
                         initGame();
-                        gameState = GAME_STATE_MENU;
+                        gameState = GAME_STATE.MENU;
                     } break;
             }
         }
         var MB_LEFT = 1;
         function mouseDown() {
             //if (event.button == MB_LEFT)
-            nextMove = MOVE_ROTATE;
+            nextMove = MOVE.ROTATE;
         }
     </script>
 </body>
