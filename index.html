@@ -24,7 +24,7 @@
         }
     </style>
 </head>
-<body onload="initGame()" onkeydown="keyDown()" onmousedown="mouseDown()" onresize="resizeCanvas()">
+<body onload="loadPage()" onkeydown="keyDown()" onmousedown="mouseDown()" onresize="resizeCanvas()">
     <canvas id='myCanvas' height='1080' width='1920'>Not support</canvas>
     <script>
         var dropSound = new Audio("./sounds/drop.wav");
@@ -158,10 +158,15 @@
             gameBoardPosY = cellHeight*2;
         }
         var GAME_STATE = { MENU: 0, PLAY: 1, GAME_OVER: 2 };
+        function loadPage() {
+            resizeCanvas();
+
+            initGame();
+
+            setInterval(doStep, 1000 / (2 * MAX_SPEED));
+            setInterval(draw, 1000 / 30); // 30 fps
+        }
         function initGame() {
-            myCanvas = document.getElementById("myCanvas");
-            drawContext = myCanvas.getContext('2d');
-            resizeCanvas();   
             var i, j;
             gameBoard = new Array(N);
             for (i = 0; i < N; ++i) {
@@ -189,9 +194,6 @@
             nextMove = 0;
 
             gameState = GAME_STATE.MENU;
-
-            setInterval(doStep, 1000 / (2 * MAX_SPEED));
-            setInterval(draw, 1000 / 30); // 30 fps
         }
 
         function doStep() {
@@ -301,7 +303,7 @@
             movedFigure.i += di;
             movedFigure.j += dj;
             if (checkOverlap(movedFigure) == false) {
-                //moveSound.play();
+                moveSound.play();
                 figure.i = movedFigure.i;
                 figure.j = movedFigure.j;
                 return true;
@@ -347,11 +349,11 @@
             }
         }
 
-        var lastLoop = new Date;
+        var lastLoop = new Date().getTime();
         function drawInfo() {
             var info = "";
             if (showFps) {
-                var thisLoop = new Date;
+                var thisLoop = new Date().getTime();
                 var fps = 1000 / (thisLoop - lastLoop);
                 lastLoop = thisLoop;
                 info = fps.toFixed(1) + ' fps ';
