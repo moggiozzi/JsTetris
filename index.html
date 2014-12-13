@@ -440,7 +440,7 @@
         function playSound(id) {
             var element = document.getElementById(id);
             if (sounds[id] == undefined) {
-                sounds[id] = new Audio("./sounds/" + id + ".mp3");
+                sounds[id] = new Audio("./sounds/" + id + ".wav");
                 sounds[id].load();
             }
             if (sounds[id].played.length == 0 || sounds[id].ended)

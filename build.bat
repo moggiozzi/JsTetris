@@ -9,5 +9,5 @@ call ares-package .
 del index.html
 del appinfo.json
 del icon.png
-del largeIcon.png
+REM del largeIcon.png
 rmdir /Q /S sounds
