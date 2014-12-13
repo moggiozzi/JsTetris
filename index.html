@@ -38,10 +38,17 @@
         var gameBoardPosX, gameBoardPosY;
         var gameState;
         var currentFigure, nextFigure;
-        var speed = 3.0; // скорость спуска фигуры (ячеек / в секунду)
+
+        var myTimer = 0; // счетчик миллисекунд
+        var lastMove = myTimer; // для ограничения перемещений фигуры
+        var lastDownMove = myTimer; // для ограничений падения
+        var speed = 1.0; // скорость спуска фигуры (ячеек / в секунду)
+        var MAX_SPEED = 30;
         var showFps = true;
         var score = 0;
 
+        var MOVE_LEFT = 1, MOVE_RIGHT = 2, MOVE_DOWN = 3, MOVE_ROTATE = 4;
+        var nextMove = 0;
         var myCanvas = document.getElementById("myCanvas");
         var drawContext = myCanvas.getContext('2d');
 
@@ -179,17 +186,61 @@
             nextFigure = new Figure(
                 Math.round(Math.random() * MAX_FIGURE_CODE),
                 Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+            myTimer = 0;
+            lastMove = myTimer;
+            lastDownMove = myTimer;
+            speed = 1.0;
+            score = 0;
+            nextMove = 0;
+
 
             gameState = GAME_STATE_MENU;
 
-            setInterval(doStep, 1000 / speed);
+            setInterval(doStep, 1000 / (2 * MAX_SPEED));
             setInterval(draw, 1000 / 30); // 30 fps
+            setInterval(incTimer, 10);
+        }
+        function incTimer() {
+            myTimer+=10;
         }
 
         function doStep() {
             if (gameState != GAME_STATE_PLAY)
                 return;
-            if (tryMove(currentFigure, 1, 0) == false) {
+            var isTryDown = false;   // была попытка подвинуть вниз
+            var isMovedDown = false; // был сдвиг вниз
+            if (myTimer - lastMove >= 1000 / MAX_SPEED && nextMove != 0) // команды пользователя
+            {
+                switch (nextMove) {
+                    case MOVE_LEFT:
+                        tryMove(currentFigure, 0, -1);
+                        break;
+                    case MOVE_RIGHT:
+                        tryMove(currentFigure, 0, 1);
+                        break;
+                    case MOVE_DOWN:
+                        if (tryMove(currentFigure, 1, 0)) {
+                            isMovedDown = true;
+                            lastDownMove = myTimer;
+                        }
+                        isTryDown = true;
+                        break;
+                    case MOVE_ROTATE:
+                        tryTurn(currentFigure);
+                        break;
+                }
+                lastMove = myTimer;
+                nextMove = 0;
+            }
+            if (myTimer - lastDownMove >= 1000 / speed) // падение
+            {
+                if (tryMove(currentFigure, 1, 0)) {
+                    isMovedDown = true;
+                    lastDownMove = myTimer;
+                }
+                isTryDown = true;
+            }
+            if ( isTryDown && !isMovedDown){
                 dropSound.play();
                 // "положить" фигуру на поле
                 var i, j;
@@ -206,11 +257,11 @@
                     currentFigure.i--;
                     gameState = GAME_STATE_END;
                 }
+                doClear();
             }
-            doClear();
         }
         function doClear() {
-            var addScore = 0;
+            var cnt = 0;
             for (i = N - 2; i > 1;) {
                 var isFullLine = true;
                 var isEmptyLine = true;
@@ -228,14 +279,19 @@
                         gameBoard[k] = gameBoard[k - 1].slice();
                     for (j = 1; j < M - 1; ++j)
                         gameBoard[0][j] = 0;
-                    addScore += 2 * addScore + 1;
+                    ++cnt;
                 } else {
                     --i;
                 }
             }
-            score += addScore;
-            if (addScore > 0)
+            if (cnt > 0)
                 clearSound.play();
+            if (cnt>2)
+                score += 2000;
+            if (cnt>1)
+                score += 500;
+            if (cnt==1)
+                score += 100;
         }
 
         function checkOverlap(figure) {
@@ -254,6 +310,7 @@
             movedFigure.i += di;
             movedFigure.j += dj;
             if (checkOverlap(movedFigure) == false) {
+                //moveSound.play();
                 figure.i = movedFigure.i;
                 figure.j = movedFigure.j;
                 return true;
@@ -363,20 +420,16 @@
                     {
                         switch (event.keyCode) {
                             case KEY_UP:
-                                if (tryTurn(currentFigure))
-                                    moveSound.play();
+                                nextMove = MOVE_ROTATE;
                                 break;
                             case KEY_DOWN:
-                                if (tryMove(currentFigure, 1, 0))
-                                    moveSound.play();
+                                nextMove = MOVE_DOWN;
                                 break;
                             case KEY_LEFT:
-                                if (tryMove(currentFigure, 0, -1))
-                                    moveSound.play();
+                                nextMove = MOVE_LEFT;
                                 break;
                             case KEY_RIGHT:
-                                if (tryMove(currentFigure, 0, 1))
-                                    moveSound.play();
+                                nextMove = MOVE_RIGHT;
                                 break;
                         }
                     } break;
@@ -390,7 +443,7 @@
         var MB_LEFT = 1;
         function mouseDown() {
             //if (event.button == MB_LEFT)
-            tryTurn(currentFigure);
+            nextMove = MOVE_ROTATE;
         }
     </script>
 </body>
