@@ -3,7 +3,8 @@
 <head>
     <title>Tetris</title>
     <meta charset='utf-8' />
-    <script src="./scripts/scripts.js"></script>
+    <script src="./js/bufferLoader.js"></script>
+    <script src="./js/helper.js"></script>
         <style>
         html,
         body {
@@ -159,6 +160,7 @@
         function loadPage() {
             resizeCanvas();
 
+            initAudio();
             initGame();
 
             setInterval(doStep, 1000 / (2 * MAX_SPEED));
@@ -301,7 +303,7 @@
             movedFigure.i += di;
             movedFigure.j += dj;
             if (checkOverlap(movedFigure) == false) {
-                playSound('move');
+                //playSound('move');
                 figure.i = movedFigure.i;
                 figure.j = movedFigure.j;
                 return true;
@@ -437,7 +439,32 @@
             nextMove = MOVE.ROTATE;
         }
 
+        function initAudio() {
+            if (getBrowserName()=="safari") // for Lg WebOS
+            {
+                isWebKit = true;
+                window.context;
+                window.bufferLoader;
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                context = new AudioContext();
+                bufferLoader = new BufferLoader(
+                    context,
+                    [
+                        './sounds/move.wav',
+                        './sounds/drop.wav',
+                        './sounds/clear.wav',
+                    ],
+                    function () { }
+                );
+                bufferLoader.load();
+            }
+        }
+        var isWebKit = false;
         function playSound(id) {
+            if (isWebKit){
+                playSoundForWebKit(id);
+                return;
+            }
             var element = document.getElementById(id);
             if (sounds[id] == undefined) {
                 sounds[id] = new Audio("./sounds/" + id + ".wav");
@@ -446,6 +473,20 @@
             if (sounds[id].played.length == 0 || sounds[id].ended)
                 sounds[id].play();
         }
+        
+        function playSoundForWebKit(id) {
+            var source = context.createBufferSource(); // может не стоит каждый раз вызывать?
+            var idx = 0;
+            switch (id) { // fixme сделать список звуков
+                case 'move':  idx = 0; break;
+                case 'drop':  idx = 1; break;
+                case 'clear': idx = 2; break;
+            }
+            source.buffer = window.bufferLoader.bufferList[idx];
+            source.connect(context.destination);
+            source.start(0);
+        }
+
     </script>
 </body>
 </html>
