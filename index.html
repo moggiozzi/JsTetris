@@ -27,9 +27,7 @@
 <body onload="loadPage()" onkeydown="keyDown()" onmousedown="mouseDown()" onresize="resizeCanvas()">
     <canvas id='myCanvas' height='1080' width='1920'>Not support</canvas>
     <script>
-        var dropSound = new Audio("./sounds/drop.wav");
-        var clearSound = new Audio("./sounds/clear.wav");
-        var moveSound = new Audio("./sounds/move.wav");
+        var sounds = [];
 
         var N = 20; // количество строк
         var M = 10; // количество столбцов
@@ -234,7 +232,7 @@
                 isTryDown = true;
             }
             if ( isTryDown && !isMovedDown){
-                dropSound.play();
+                playSound('drop');
                 // "положить" фигуру на поле
                 var i, j;
                 for (i = 0; i < 3; ++i)
@@ -278,7 +276,7 @@
                 }
             }
             if (cnt > 0)
-                clearSound.play();
+                playSound('clear');
             if (cnt>2)
                 score += 2000;
             if (cnt>1)
@@ -303,7 +301,7 @@
             movedFigure.i += di;
             movedFigure.j += dj;
             if (checkOverlap(movedFigure) == false) {
-                moveSound.play();
+                playSound('move');
                 figure.i = movedFigure.i;
                 figure.j = movedFigure.j;
                 return true;
@@ -437,6 +435,16 @@
         function mouseDown() {
             //if (event.button == MB_LEFT)
             nextMove = MOVE.ROTATE;
+        }
+
+        function playSound(id) {
+            var element = document.getElementById(id);
+            if (sounds[id] == undefined) {
+                sounds[id] = new Audio("./sounds/" + id + ".mp3");
+                sounds[id].load();
+            }
+            if (sounds[id].played.length == 0 || sounds[id].ended)
+                sounds[id].play();
         }
     </script>
 </body>
