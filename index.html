@@ -46,7 +46,7 @@
         var showFps = true;
         var score = 0;
 
-        var MOVE = { LEFT: 1, RIGHT: 2, DOWN: 3, MOVE: 4 };
+        var MOVE = { LEFT: 1, RIGHT: 2, DOWN: 3, MOVE: 4, DROP: 5 };
         var nextMove = 0;
         var myCanvas = document.getElementById("myCanvas");
         var drawContext = myCanvas.getContext('2d');
@@ -221,6 +221,10 @@
                     case MOVE.ROTATE:
                         tryTurn(currentFigure);
                         break;
+                    case MOVE.DROP:
+                        while (tryMove(currentFigure, 1, 0));
+                        putDown();
+                        break;
                 }
                 lastMove = myTimer;
                 nextMove = 0;
@@ -234,24 +238,27 @@
                 isTryDown = true;
             }
             if ( isTryDown && !isMovedDown){
-                playSound('drop');
-                // "положить" фигуру на поле
-                var i, j;
-                for (i = 0; i < 3; ++i)
-                    for (j = 0; j < 3; ++j) {
-                        if (currentFigure.data[i][j] != 0)
-                            gameBoard[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
-                    }
-                currentFigure = nextFigure;
-                nextFigure = new Figure(
-                    Math.round(Math.random() * MAX_FIGURE_CODE),
-                    Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-                if (tryMove(currentFigure, 1, 0) == false) {
-                    currentFigure.i--;
-                    gameState = GAME_STATE.GAME_OVER;
-                }
-                doClear();
+                putDown();
             }
+        }
+        function putDown() { // положить фигура
+            playSound('drop');
+            // "положить" фигуру на поле
+            var i, j;
+            for (i = 0; i < 3; ++i)
+                for (j = 0; j < 3; ++j) {
+                    if (currentFigure.data[i][j] != 0)
+                        gameBoard[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
+                }
+            currentFigure = nextFigure;
+            nextFigure = new Figure(
+                Math.round(Math.random() * MAX_FIGURE_CODE),
+                Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+            if (tryMove(currentFigure, 1, 0) == false) {
+                currentFigure.i--;
+                gameState = GAME_STATE.GAME_OVER;
+            }
+            doClear();
         }
         function doClear() {
             var cnt = 0;
@@ -402,7 +409,7 @@
                     } break;
             }
         }
-        var KEY_UP = 38, KEY_DOWN = 40, KEY_LEFT = 37, KEY_RIGHT = 39, KEY_ENTER = 13;
+        var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32 };
         function keyDown() {
             switch (gameState) {
                 case GAME_STATE.MENU:
@@ -412,17 +419,20 @@
                 case GAME_STATE.PLAY:
                     {
                         switch (event.keyCode) {
-                            case KEY_UP:
+                            case KEY.UP:
                                 nextMove = MOVE.ROTATE;
                                 break;
-                            case KEY_DOWN:
+                            case KEY.DOWN:
                                 nextMove = MOVE.DOWN;
                                 break;
-                            case KEY_LEFT:
+                            case KEY.LEFT:
                                 nextMove = MOVE.LEFT;
                                 break;
-                            case KEY_RIGHT:
+                            case KEY.RIGHT:
                                 nextMove = MOVE.RIGHT;
+                                break;
+                            case KEY.SPACE:
+                                nextMove = MOVE.DROP;
                                 break;
                         }
                     } break;
