@@ -219,7 +219,18 @@
                         isTryDown = true;
                         break;
                     case MOVE.ROTATE:
-                        tryTurn(currentFigure);
+                        if (!tryTurn(currentFigure)) {
+                            temp = new Figure();
+                            copyFigure(temp,currentFigure)
+                            if (temp.j == 0) {
+                                if (tryMove(temp, 0, 1) && tryTurn(temp))
+                                    copyFigure(currentFigure, temp);
+                            }
+                            if (temp.j == M - 3) {
+                                if (tryMove(temp, 0, -1) && tryTurn(temp))
+                                    copyFigure(currentFigure, temp);
+                            }
+                        }
                         break;
                     case MOVE.DROP:
                         while (tryMove(currentFigure, 1, 0));
