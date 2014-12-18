@@ -125,11 +125,11 @@ function doStep() {
                 if (!tryTurn(currentFigure)) {
                     temp = new Figure();
                     copyFigure(temp, currentFigure)
-                    if (temp.j == 0) {
+                    if (temp.j < M-2) {
                         if (tryMove(temp, 0, 1) && tryTurn(temp))
                             copyFigure(currentFigure, temp);
                     }
-                    if (temp.j == M - 3) {
+                    if (temp.j > 0) {
                         if (tryMove(temp, 0, -1) && tryTurn(temp))
                             copyFigure(currentFigure, temp);
                     }
