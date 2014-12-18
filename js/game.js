@@ -172,14 +172,22 @@ function putDown() { // положить фигура
         currentFigure.i--;
         gameState = GAME_STATE.GAME_OVER;
     }
-    doClear();
+    checkFilled();
 }
-function doClear() {
+
+function ClearAnimInfo(row_)
+{
+    this.row = row_;
+    this.cnt = 30; // счетчик/таймер анимации
+}
+var clearAnimateTime = 0;
+var clearingRows = [];
+function checkFilled() {
     var cnt = 0;
-    for (i = N - 2; i > 1;) {
+    for (var i = N - 2; i > 1; i--) {
         var isFullLine = true;
         var isEmptyLine = true;
-        for (j = 1; j < M - 1; ++j) {
+        for (var j = 1; j < M - 1; ++j) {
             if (gameBoard[i][j] == 0)
                 isFullLine = false;
             else
@@ -188,24 +196,35 @@ function doClear() {
         if (isEmptyLine)
             break;
         if (isFullLine) {
-            var k;
-            for (k = i; k > 0; --k)
-                gameBoard[k] = gameBoard[k - 1].slice();
-            for (j = 1; j < M - 1; ++j)
-                gameBoard[0][j] = 0;
-            ++cnt;
-        } else {
-            --i;
+            var isPresent = false;
+            for (var k = 0; k < clearingRows.length; k++)
+                if (clearingRows[k].row == i) // строка уже есть в списке удаляемых(анимируемых)
+                    isPresent = true;
+            if (!isPresent)
+                clearingRows.push(new ClearAnimInfo(i));
         }
     }
-    if (cnt > 0)
-        playSound('clear');
-    if (cnt > 2)
-        score += 2000;
-    if (cnt > 1)
-        score += 500;
-    if (cnt == 1)
-        score += 100;
+}
+function animateRemoval()
+{
+    var i = 0;
+    while (i < clearingRows.length) {
+        if (clearingRows[i].cnt > 0) {
+            // \todo анимация
+            drawContext.fillStyle = COLOR_GRAY;
+            drawContext.fillRect(gameBoardPosX, gameBoardPosY + clearingRows[i].row * cellHeight, cellWidth * M - 1, cellHeight);
+            clearingRows[i].cnt--; 
+            i++;
+        } else {
+            //удаление строки
+            var k;
+            for (k = clearingRows[i].row; k > 0; --k)
+                gameBoard[k] = gameBoard[k - 1].slice();
+            for (k = i + 1; k < clearingRows.length; ++k)
+                clearingRows[k].row++;
+            clearingRows.splice(i, 1);
+        }
+    }
 }
 
 function checkOverlap(figure) {
@@ -313,6 +332,8 @@ function draw() {
                 drawBoard();
                 drawInfo();
                 drawFigure(currentFigure);
+                if (clearingRows.length > 0)
+                    animateRemoval();
             } break;
         case GAME_STATE.GAME_OVER:
             {
