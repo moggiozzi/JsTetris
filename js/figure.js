@@ -1,4 +1,5 @@
-﻿var FIGURE_CODE = { CUBE: 0, LINE: 1, VISOR1: 2, VISOR2: 3, STAIR1: 4, STAIR2: 5, LEDGE: 6 };
+﻿var MAX_COLOR_CODE = 8*3;// blocks.png blocks count
+var FIGURE_CODE = { CUBE: 0, LINE: 1, VISOR1: 2, VISOR2: 3, STAIR1: 4, STAIR2: 5, LEDGE: 6 };
 var MAX_FIGURE_CODE = 7
 function Figure(figureCode, colorCode) {
     this.code = figureCode;

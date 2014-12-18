@@ -25,32 +25,6 @@ var nextMove = 0;
 var myCanvas = document.getElementById("myCanvas");
 var drawContext = myCanvas.getContext('2d');
 
-var MAX_COLOR_CODE = 6;
-var COLOR_CODE_GRAY = 7; // серый для фона
-var COLOR_GRAY = "#808080";
-var COLOR_BLUE = "#0000FF";
-var COLOR_BLACK = "#000000";
-function getColor(colorCode) {
-    switch (colorCode) {
-        case 1:
-            return "#FF0000";
-        case 2:
-            return "#00FF00";
-        case 3:
-            return COLOR_BLUE;
-        case 4:
-            return "#FFFF00";
-        case 5:
-            return "#FF00FF";
-        case 6:
-            return "#00FFFF";
-        case COLOR_CODE_GRAY:
-            return COLOR_GRAY;
-        default:
-            return "#D0D0D0";
-    }
-}
-
 function resizeCanvas() {
     myCanvas.width = window.innerWidth;
     myCanvas.height = window.innerHeight;
@@ -70,6 +44,8 @@ function loadPage() {
     setInterval(draw, 1000 / 30); // 30 fps
 }
 function initGame() {
+    resources.load(['img/blocks.png','img/tetris.png']);
+
     var i, j;
     gameBoard = new Array(N);
     for (i = 0; i < N; ++i) {
@@ -79,9 +55,9 @@ function initGame() {
     }
     // добавим "рамку" чтоб не проверять граничные условия
     for (i = 0; i < N; ++i)
-        gameBoard[i][0] = gameBoard[i][M - 1] = COLOR_CODE_GRAY;
+        gameBoard[i][0] = gameBoard[i][M - 1] = 1;
     for (j = 0; j < M; ++j)
-        gameBoard[N - 1][j] = COLOR_CODE_GRAY;
+        gameBoard[N - 1][j] = 1;
 
     currentFigure = new Figure(
         Math.round(Math.random() * MAX_FIGURE_CODE),
@@ -184,6 +160,7 @@ var clearAnimateTime = 0;
 var clearingRows = [];
 function checkFilled() {
     var cnt = 0;
+    var isNeedPlayClearSound = false;
     for (var i = N - 2; i > 1; i--) {
         var isFullLine = true;
         var isEmptyLine = true;
@@ -200,18 +177,23 @@ function checkFilled() {
             for (var k = 0; k < clearingRows.length; k++)
                 if (clearingRows[k].row == i) // строка уже есть в списке удаляемых(анимируемых)
                     isPresent = true;
-            if (!isPresent)
+            if (!isPresent) {
                 clearingRows.push(new ClearAnimInfo(i));
+                isNeedPlayClearSound = true;
+            }
         }
     }
+    if (isNeedPlayClearSound)
+        playSound('clear');
 }
 function animateRemoval()
 {
+    var clearedCount = 0;
     var i = 0;
     while (i < clearingRows.length) {
         if (clearingRows[i].cnt > 0) {
             // \todo анимация
-            drawContext.fillStyle = COLOR_GRAY;
+            drawContext.fillStyle = "#808080";
             drawContext.fillRect(gameBoardPosX, gameBoardPosY + clearingRows[i].row * cellHeight, cellWidth * M - 1, cellHeight);
             clearingRows[i].cnt--; 
             i++;
@@ -223,8 +205,15 @@ function animateRemoval()
             for (k = i + 1; k < clearingRows.length; ++k)
                 clearingRows[k].row++;
             clearingRows.splice(i, 1);
+            clearedCount++;
         }
     }
+    if (clearedCount > 2)
+        score += 2000;
+    if (clearedCount > 1)
+        score += 500;
+    if (clearedCount == 1)
+        score += 100;
 }
 
 function checkOverlap(figure) {
@@ -269,22 +258,27 @@ function tryTurn(figure) {
     return false;
 }
 
-function drawBoard() {
-    drawContext.fillStyle = COLOR_GRAY;
-    drawContext.fillRect(gameBoardPosX, 0, cellWidth * M - 1, cellHeight * 2);
+function drawBlock(idx, x, y) {
+    var BLOCK_SIZE = 64;
+    var i = Math.floor( idx / 8 );
+    var j = idx % 8;
+    drawContext.drawImage(resources.get('img/blocks.png'),
+        j * BLOCK_SIZE, i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
+        x, y, cellWidth, cellHeight);
+}
 
+function drawBoard() {
+    // background
+    drawContext.fillStyle = "#808080";
+    drawContext.fillRect(gameBoardPosX, 0, cellWidth * M, cellHeight * (N+2));
+    // blocks
     var i, j;
     for (i = 0; i < N; ++i) {
         for (j = 0; j < M; ++j) {
-            drawContext.fillStyle = getColor(gameBoard[i][j]);
             if (gameBoard[i][j] != 0)
-                drawContext.fillRect(
+                drawBlock(gameBoard[i][j],
                     gameBoardPosX + j * cellHeight,
                     gameBoardPosY + i * cellWidth, cellWidth - 1, cellHeight - 1);
-            else
-                drawContext.fillRect(
-                    gameBoardPosX + j * cellHeight,
-                    gameBoardPosY + i * cellWidth, cellWidth, cellHeight);
         }
     }
 }
@@ -299,17 +293,16 @@ function drawInfo() {
         info = fps.toFixed(1) + ' fps ';
     }
     info += ' Score: ' + score;
-    drawContext.fillStyle = COLOR_BLACK;
+    drawContext.fillStyle = "#000000";
     drawContext.fillText(info, gameBoardPosX, cellHeight);
 }
 
 function drawFigure(figure) {
-    drawContext.fillStyle = getColor(figure.colorCode);
     var i, j;
     for (i = 0; i < 3; ++i) {
         for (j = 0; j < 3; ++j) {
             if (figure.data[i][j] != 0)
-                drawContext.fillRect(
+                drawBlock(figure.data[i][j],
                     gameBoardPosX + (figure.j + j) * cellHeight,
                     gameBoardPosY + (figure.i + i) * cellWidth, cellWidth - 1, cellHeight - 1);
         }
@@ -321,7 +314,7 @@ function draw() {
         case GAME_STATE.MENU:
             {
                 drawBoard();
-                drawContext.fillStyle = COLOR_BLACK;
+                drawContext.fillStyle = "#000000";
                 drawContext.textAlign = "center";
                 var str = "Press to start.";
                 drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
@@ -337,7 +330,7 @@ function draw() {
             } break;
         case GAME_STATE.GAME_OVER:
             {
-                drawContext.fillStyle = COLOR_BLACK;
+                drawContext.fillStyle = "#000000";
                 drawContext.textAlign = "center";
                 var str = "You result: " + score;
                 drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
