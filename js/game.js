@@ -19,6 +19,7 @@ var speed = 1.0; // скорость спуска фигуры (ячеек / в 
 var MAX_SPEED = 30;
 var showFps = true;
 var score = 0;
+var bestScore = 0;
 
 var MOVE = { LEFT: 1, RIGHT: 2, DOWN: 3, MOVE: 4, DROP: 5 };
 var nextMove = 0;
@@ -44,6 +45,9 @@ function loadPage() {
     setInterval(draw, 1000 / 30); // 30 fps
 }
 function initGame() {
+    storage = window.localStorage;
+    bestScore = storage['bestScore'] || 0;
+
     resources.load(['img/blocks.png','img/tetris.png']);
 
     var i, j;
@@ -334,6 +338,10 @@ function draw() {
                 drawContext.textAlign = "center";
                 var str = "You result: " + score;
                 drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
+                var str = "Record: " + bestScore;
+                drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2+30);
+                if (score > bestScore)
+                    storage['bestScore'] = bestScore = score;
             } break;
     }
 }
