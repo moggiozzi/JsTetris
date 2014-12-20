@@ -48,7 +48,7 @@ function initGame() {
     storage = window.localStorage;
     bestScore = storage['bestScore'] || 0;
 
-    resources.load(['img/blocks.png','img/tetris.png']);
+    resources.load(['img/blocks.png','img/tetris.png','img/rem.png']);
 
     var i, j;
     gameBoard = new Array(N);
@@ -158,7 +158,7 @@ function putDown() { // положить фигура
 function ClearAnimInfo(row_)
 {
     this.row = row_;
-    this.cnt = 30; // счетчик/таймер анимации
+    this.cnt = 10; // счетчик/таймер анимации
 }
 var clearAnimateTime = 0;
 var clearingRows = [];
@@ -182,6 +182,8 @@ function checkFilled() {
                 if (clearingRows[k].row == i) // строка уже есть в списке удаляемых(анимируемых)
                     isPresent = true;
             if (!isPresent) {
+                for(var j=1;j<M-1;j++)
+                    gameBoard[i][j]=0;
                 clearingRows.push(new ClearAnimInfo(i));
                 isNeedPlayClearSound = true;
             }
@@ -196,10 +198,14 @@ function animateRemoval()
     var i = 0;
     while (i < clearingRows.length) {
         if (clearingRows[i].cnt > 0) {
-            // \todo анимация
-            drawContext.fillStyle = "#808080";
-            drawContext.fillRect(gameBoardPosX, gameBoardPosY + clearingRows[i].row * cellHeight, cellWidth * M - 1, cellHeight);
-            clearingRows[i].cnt--; 
+            var frameIdx = 10 - clearingRows[i].cnt;
+            for(var k = 1; k < M-1; k++) {
+                drawContext.drawImage(resources.get('img/rem.png'),
+                    frameIdx * 64, 0, 64, 64,
+                    gameBoardPosX+k*cellWidth, gameBoardPosY + clearingRows[i].row * cellHeight,
+                    cellWidth, cellHeight);
+            }
+            clearingRows[i].cnt--;
             i++;
         } else {
             //удаление строки
