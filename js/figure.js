@@ -54,9 +54,9 @@ function Figure() {
             //case FIGURE_CODE.CUBE:
         default:
             this.data = [
+                [0, c, c],
+                [0, c, c],
                 [0, 0, 0],
-                [0, c, c],
-                [0, c, c],
             ];
             break;
     }

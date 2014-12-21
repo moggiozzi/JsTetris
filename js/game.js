@@ -138,8 +138,7 @@ function putDown() { // положить фигура
         }
     currentFigure = nextFigure;
     nextFigure = new Figure();
-    if (tryMove(currentFigure, 1, 0) == false) {
-        currentFigure.i--;
+    if (checkOverlap(currentFigure)) {
         gameState = GAME_STATE.GAME_OVER;
     }
     checkFilled();
@@ -268,9 +267,6 @@ function drawBlock(idx, x, y) {
 }
 
 function drawBoard() {
-    // background
-    drawContext.fillStyle = "#808080";
-    drawContext.fillRect(gameBoardPosX, 0, cellWidth * M, cellHeight * (N+2));
     // blocks
     var i, j;
     for (i = 0; i < N; ++i) {
@@ -278,13 +274,18 @@ function drawBoard() {
             //if (gameBoard[i][j] != 0)
                 drawBlock(gameBoard[i][j],
                     gameBoardPosX + j * cellHeight,
-                    gameBoardPosY + i * cellWidth, cellWidth - 1, cellHeight - 1);
+                    gameBoardPosY + i * cellWidth, cellWidth, cellHeight);
         }
     }
 }
 
 var lastLoop = new Date().getTime();
 function drawInfo() {
+    for(var i=0;i<2;i++)
+        for(var j=0;j<M;j++)
+            drawBlock(1,
+                gameBoardPosX + j * cellHeight,
+                i * cellWidth, cellWidth , cellHeight);
     var info = "";
     if (showFps) {
         var thisLoop = new Date().getTime();
@@ -293,18 +294,29 @@ function drawInfo() {
         info = fps.toFixed(1) + ' fps ';
     }
     info += ' Score: ' + score;
-    drawContext.fillStyle = "#000000";
+    drawContext.fillStyle = "#ffffff";
+    drawContext.textAlign = "left";
     drawContext.fillText(info, gameBoardPosX, cellHeight);
 }
 
-function drawFigure(figure) {
+function drawFigure(figure, x, y) {
+    if (arguments.length < 3 ) {
+        x = gameBoardPosX + figure.j * cellWidth;
+        y = gameBoardPosY + figure.i * cellHeight;
+    }
+    else {
+        BLOCK_SIZE = 64;
+        drawContext.drawImage(resources.get('img/blocks.png'),
+            0, 0, BLOCK_SIZE, BLOCK_SIZE,
+            x, y, 3 * cellWidth, 3* cellHeight);
+    }
     var i, j;
     for (i = 0; i < 3; ++i) {
         for (j = 0; j < 3; ++j) {
             if (figure.data[i][j] != 0)
                 drawBlock(figure.data[i][j],
-                    gameBoardPosX + (figure.j + j) * cellHeight,
-                    gameBoardPosY + (figure.i + i) * cellWidth, cellWidth - 1, cellHeight - 1);
+                    x + j * cellHeight,
+                    y + i * cellWidth, cellWidth, cellHeight);
         }
     }
 }
@@ -314,7 +326,7 @@ function draw() {
         case GAME_STATE.MENU:
             {
                 drawBoard();
-                drawContext.fillStyle = "#000000";
+                drawContext.fillStyle = "##ffffff";
                 drawContext.textAlign = "center";
                 var str = "Press to start.";
                 drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
@@ -323,14 +335,13 @@ function draw() {
             {
                 drawContext.textAlign = "left";
                 drawBoard();
-                drawInfo();
                 drawFigure(currentFigure);
                 if (clearingRows.length > 0)
                     animateRemoval();
             } break;
         case GAME_STATE.GAME_OVER:
             {
-                drawContext.fillStyle = "#000000";
+                drawContext.fillStyle = "##ffffff";
                 drawContext.textAlign = "center";
                 var str = "You result: " + score;
                 drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
@@ -340,6 +351,8 @@ function draw() {
                     storage['bestScore'] = bestScore = score;
             } break;
     }
+    drawFigure(nextFigure, gameBoardPosX + cellWidth * M, gameBoardPosY);
+    drawInfo();
 }
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32 };
 function keyDown() {
