@@ -6,8 +6,8 @@ var cellWidth, cellHeight;
 var gameBoard;
 var gameBoardPosX, gameBoardPosY;
 var gameState;
-var currentFigure = new Figure();
 var nextFigure = new Figure();
+var currentFigure = nextFigure;
 var myTimer = 0; // счетчик миллисекунд
 var lastMove = myTimer; // для ограничения перемещений фигуры
 var lastDownMove = myTimer; // для ограничений падения
@@ -58,9 +58,8 @@ function initGame() {
         gameBoard[i][0] = gameBoard[i][M - 1] = 1;
     for (j = 0; j < M; ++j)
         gameBoard[N - 1][j] = 1;
-
-    currentFigure = new Figure();
     nextFigure = new Figure();
+    currentFigure = nextFigure;
     myTimer = new Date().getTime();
     lastMove = myTimer;
     lastDownMove = myTimer;
@@ -360,6 +359,7 @@ function keyDown() {
         case GAME_STATE.MENU:
             {
                 gameState = GAME_STATE.PLAY;
+                nextFigure = new Figure();
             } break;
         case GAME_STATE.PLAY:
             {
