@@ -6,12 +6,8 @@ var cellWidth, cellHeight;
 var gameBoard;
 var gameBoardPosX, gameBoardPosY;
 var gameState;
-var currentFigure = new Figure(
-        Math.round(Math.random() * MAX_FIGURE_CODE),
-        Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-var nextFigure = new Figure(
-        Math.round(Math.random() * MAX_FIGURE_CODE),
-        Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+var currentFigure = new Figure();
+var nextFigure = new Figure();
 var myTimer = 0; // счетчик миллисекунд
 var lastMove = myTimer; // для ограничения перемещений фигуры
 var lastDownMove = myTimer; // для ограничений падения
@@ -63,12 +59,8 @@ function initGame() {
     for (j = 0; j < M; ++j)
         gameBoard[N - 1][j] = 1;
 
-    currentFigure = new Figure(
-        Math.round(Math.random() * MAX_FIGURE_CODE),
-        Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
-    nextFigure = new Figure(
-        Math.round(Math.random() * MAX_FIGURE_CODE),
-        Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+    currentFigure = new Figure();
+    nextFigure = new Figure();
     myTimer = new Date().getTime();
     lastMove = myTimer;
     lastDownMove = myTimer;
@@ -145,9 +137,7 @@ function putDown() { // положить фигура
                 gameBoard[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
         }
     currentFigure = nextFigure;
-    nextFigure = new Figure(
-        Math.round(Math.random() * MAX_FIGURE_CODE),
-        Math.round(Math.random() * (MAX_COLOR_CODE - 1) + 1));
+    nextFigure = new Figure();
     if (tryMove(currentFigure, 1, 0) == false) {
         currentFigure.i--;
         gameState = GAME_STATE.GAME_OVER;
@@ -285,7 +275,7 @@ function drawBoard() {
     var i, j;
     for (i = 0; i < N; ++i) {
         for (j = 0; j < M; ++j) {
-            if (gameBoard[i][j] != 0)
+            //if (gameBoard[i][j] != 0)
                 drawBlock(gameBoard[i][j],
                     gameBoardPosX + j * cellHeight,
                     gameBoardPosY + i * cellWidth, cellWidth - 1, cellHeight - 1);

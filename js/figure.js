@@ -1,14 +1,14 @@
-﻿var MAX_COLOR_CODE = 8*3;// blocks.png blocks count
+﻿var MAX_COLOR_CODE = 5;// blocks.png
 var FIGURE_CODE = { CUBE: 0, LINE: 1, VISOR1: 2, VISOR2: 3, STAIR1: 4, STAIR2: 5, LEDGE: 6 };
 var MAX_FIGURE_CODE = 7
-function Figure(figureCode, colorCode) {
-    this.code = figureCode;
-    this.colorCode = colorCode;
+function Figure() {
+    this.code = Math.round(Math.random() * MAX_FIGURE_CODE);
+    this.colorCode = Math.round(Math.random() * MAX_COLOR_CODE)+2;
     // координаты появления
     this.j = Math.floor((M - 3) / 2);
     this.i = 0; // todo -2
-    var c = colorCode;
-    switch (figureCode) {
+    var c = this.colorCode;
+    switch (this.code) {
         case FIGURE_CODE.LINE:
             this.data = [
                 [0, c, 0],
