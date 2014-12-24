@@ -31,7 +31,7 @@ function resizeCanvas() {
     myCanvas.height = window.innerHeight;
     cellWidth = cellHeight = Math.floor(Math.min(myCanvas.width / M, (myCanvas.height) / (N + 2)));
     drawContext.font = cellWidth.toString() + 'px Arial';
-    boardPosX = (myCanvas.width - cellWidth * M) / 2;
+    boardPosX = Math.floor((myCanvas.width - cellWidth * M) / 2);
     boardPosY = cellHeight * 2;
     boardWidth = cellWidth * M;
     boardHeight = cellHeight * N;
@@ -44,6 +44,8 @@ function loadPage() {
     initAudio();
     initGame();
 
+    drawContext.imageSmoothingEnabled = false;
+
     setInterval(doStep, 1000 / (2 * MAX_SPEED));
     setInterval(draw, 1000 / 30); // 30 fps
 }
@@ -51,7 +53,7 @@ function initGame() {
     storage = window.localStorage;
     bestScore = storage['bestScore'] || 0;
 
-    resources.load(["img/blocks.png","img/tetris.png","img/rem.png"]);
+    resources.load(["img/blocks.png","img/tetris.png","img/rem.png","img/font32.png"]);
 
     var i, j;
     board = new Array(N);
