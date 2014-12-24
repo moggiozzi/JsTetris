@@ -22,6 +22,10 @@ var nextMove = 0;
 var myCanvas = document.getElementById("myCanvas");
 var drawContext = myCanvas.getContext('2d');
 
+var bgColor1 = "#343629";
+var bgColor2 = "#6B7353";
+var bgColor3 = "#D0DBBD";
+
 function resizeCanvas() {
     myCanvas.width = window.innerWidth;
     myCanvas.height = window.innerHeight;
@@ -33,7 +37,7 @@ function resizeCanvas() {
     boardHeight = cellHeight * N;
     infoPanelWidth = boardWidth;
 }
-var GAME_STATE = { MENU: 0, PLAY: 1, GAME_OVER: 2 };
+var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
 function loadPage() {
     resizeCanvas();
 
@@ -47,7 +51,7 @@ function initGame() {
     storage = window.localStorage;
     bestScore = storage['bestScore'] || 0;
 
-    resources.load(["img/blocks.png","img/tetris.png","img/rem.png","img/bg.png"]);
+    resources.load(["img/blocks.png","img/tetris.png","img/rem.png"]);
 
     var i, j;
     board = new Array(N);
@@ -269,16 +273,12 @@ function drawBlock(idx, x, y) {
 }
 
 function drawBoard() {
-    // blocks
+    drawContext.fillStyle = bgColor3;
+    drawContext.fillRect(boardPosX, boardPosY, boardWidth, boardHeight);
     var i, j;
-    //for (i = 0; i < 2; i++)
-    //    for (j = 0; j < M; j++)
-    //        drawBlock(1,
-    //            boardPosX + j * cellHeight,
-    //            i * cellWidth, cellWidth, cellHeight);
     for (i = 0; i < N; ++i) {
         for (j = 0; j < M; ++j) {
-            //if (board[i][j] != 0)
+            if (board[i][j] != 0)
                 drawBlock(board[i][j],
                     boardPosX + j * cellHeight,
                     boardPosY + i * cellWidth, cellWidth, cellHeight);
@@ -295,19 +295,29 @@ function drawInfo() {
         lastLoop = thisLoop;
         info = fps.toFixed(1) + ' fps ';
     }
-    //drawContext.lineWidth = 5;
-    drawContext.fillStyle = "#ffffff";
-    roundRect(drawContext,
-        boardPosX + boardWidth + cellWidth, boardPosY + cellHeight,
-        infoPanelWidth - 2 * cellWidth, 2 * cellHeight, cellWidth / 2, true, false);
-    var d = 5;
-    roundRect(drawContext,
-        boardPosX + boardWidth + cellWidth + d, boardPosY + cellHeight + d,
-        infoPanelWidth - 2 * cellWidth - 2 * d, 2 * cellHeight - 2 * d, cellWidth / 2 - d, false, true);
+    drawContext.fillStyle = bgColor1;
+    var x = boardPosX+boardWidth,
+        y = 3 * cellHeight;
+    drawContext.fillStyle = bgColor3;
+    drawContext.fillRect(x, y, infoPanelWidth, 4.5 * cellHeight);
+    drawContext.fillStyle = bgColor2;
+    drawContext.fillRect(x, y + cellHeight / 4, infoPanelWidth, 1.5 * cellHeight);
+    drawContext.fillRect(x, y + 2 * cellHeight, infoPanelWidth, cellHeight / 4);
+    drawContext.fillRect(x, y + 4 * cellHeight, infoPanelWidth, cellHeight / 4);
+    drawContext.fillStyle = bgColor3;
+    var d = cellHeight/8;
+    cornerRect(drawContext,
+        x + cellWidth, y - cellHeight,
+        infoPanelWidth - 2 * cellWidth, 2 * cellHeight, d, true, false);
+    drawContext.lineWidth = d/2;
+    drawContext.fillStyle = bgColor2;
+    cornerRect(drawContext,
+        x + cellWidth + d, y - cellHeight + d,
+        infoPanelWidth - 2 * cellWidth - 2 * d, 2 * cellHeight - 2 * d, d, false, true);
+    drawContext.fillStyle = bgColor1;
     drawContext.textAlign = "center";
-    drawContext.fillText("SCORE", boardPosX + boardWidth + infoPanelWidth / 2, boardPosY + cellHeight);
-    drawContext.fillStyle = "#000000";
-    drawContext.fillText( score, boardPosX + boardWidth + infoPanelWidth / 2, boardPosY + 2 * cellHeight);
+    drawContext.fillText("SCORE", x + infoPanelWidth / 2, y);
+    drawContext.fillText( score, x + infoPanelWidth / 2, y + 3 * cellHeight);
 }
 
 function drawFigure(figure, x, y) {
@@ -316,10 +326,16 @@ function drawFigure(figure, x, y) {
         y = boardPosY + figure.i * cellHeight;
     }
     else {
-        BLOCK_SIZE = 64;
-        drawContext.drawImage(resources.get('img/blocks.png'),
-            0, 0, BLOCK_SIZE, BLOCK_SIZE,
-            x, y, 3 * cellWidth, 3* cellHeight);
+        var d = cellHeight / 8;
+        drawContext.fillStyle = bgColor3;
+        cornerRect(drawContext,
+            x - 2 * d, y - 2 * d,
+            3 * cellWidth + 4 * d, 3 * cellHeight + 4 * d, d, true, false);
+        drawContext.lineWidth = d/2;
+        drawContext.fillStyle = bgColor1;
+        cornerRect(drawContext,
+            x - d, y - d,
+            3 * cellWidth + 2 * d, 3 * cellHeight + 2 * d, d, false, true);
     }
     var i, j;
     for (i = 0; i < 3; ++i) {
@@ -333,10 +349,8 @@ function drawFigure(figure, x, y) {
 }
 
 function draw() {
-    drawContext.fillStyle = "#343629";
+    drawContext.fillStyle = bgColor1;
     drawContext.fillRect(0, 0, myCanvas.width, myCanvas.height);
-    drawContext.drawImage(resources.get('img/bg.png'),
-        boardPosX + boardWidth, boardPosY + 2 * cellHeight, 10 * cellWidth, 5 * cellHeight);
     drawBoard();
     switch (gameState) {
         case GAME_STATE.MENU:
@@ -351,6 +365,12 @@ function draw() {
                 if (clearingRows.length > 0)
                     animateRemoval();
             } break;
+        case GAME_STATE.PAUSE:
+        {
+            drawContext.fillStyle = "#ffffff";
+            drawContext.textAlign = "center";
+            drawContext.fillText("Press to resume.", myCanvas.width / 2, myCanvas.height / 2);
+        } break;
         case GAME_STATE.GAME_OVER:
             {
                 drawContext.fillStyle = "#ffffff";
@@ -366,7 +386,7 @@ function draw() {
     drawFigure(nextFigure, boardPosX + boardWidth + cellWidth, boardPosY + boardHeight - 4 * cellHeight);
     drawInfo();
 }
-var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32 };
+var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27 };
 function keyDown() {
     switch (gameState) {
         case GAME_STATE.MENU:
@@ -392,8 +412,15 @@ function keyDown() {
                     case KEY.SPACE:
                         nextMove = MOVE.DROP;
                         break;
+                    case KEY.ESC:
+                        gameState = GAME_STATE.PAUSE;
+                        break;
                 }
             } break;
+        case GAME_STATE.PAUSE:
+        {
+            gameState = GAME_STATE.PLAY;
+        }break;
         case GAME_STATE.GAME_OVER:
             {
                 initGame();
