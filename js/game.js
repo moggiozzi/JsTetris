@@ -3,8 +3,8 @@
 var N = 20; // количество строк
 var M = 10; // количество столбцов
 var cellWidth, cellHeight;
-var gameBoard;
-var gameBoardPosX, gameBoardPosY;
+var board;
+var boardPosX, boardPosY, boardWidth, boardHeight, infoPanelWidth;
 var gameState;
 var nextFigure = new Figure();
 var currentFigure = nextFigure;
@@ -27,8 +27,11 @@ function resizeCanvas() {
     myCanvas.height = window.innerHeight;
     cellWidth = cellHeight = Math.floor(Math.min(myCanvas.width / M, (myCanvas.height) / (N + 2)));
     drawContext.font = cellWidth.toString() + 'px Arial';
-    gameBoardPosX = (myCanvas.width - cellWidth * M) / 2;
-    gameBoardPosY = cellHeight * 2;
+    boardPosX = (myCanvas.width - cellWidth * M) / 2;
+    boardPosY = cellHeight * 2;
+    boardWidth = cellWidth * M;
+    boardHeight = cellHeight * N;
+    infoPanelWidth = boardWidth;
 }
 var GAME_STATE = { MENU: 0, PLAY: 1, GAME_OVER: 2 };
 function loadPage() {
@@ -44,20 +47,20 @@ function initGame() {
     storage = window.localStorage;
     bestScore = storage['bestScore'] || 0;
 
-    resources.load(['img/blocks.png','img/tetris.png','img/rem.png']);
+    resources.load(["img/blocks.png","img/tetris.png","img/rem.png","img/bg.png"]);
 
     var i, j;
-    gameBoard = new Array(N);
+    board = new Array(N);
     for (i = 0; i < N; ++i) {
-        gameBoard[i] = new Array(M);
+        board[i] = new Array(M);
         for (j = 0; j < M; ++j)
-            gameBoard[i][j] = 0;
+            board[i][j] = 0;
     }
     // добавим "рамку" чтоб не проверять граничные условия
     for (i = 0; i < N; ++i)
-        gameBoard[i][0] = gameBoard[i][M - 1] = 1;
+        board[i][0] = board[i][M - 1] = 1;
     for (j = 0; j < M; ++j)
-        gameBoard[N - 1][j] = 1;
+        board[N - 1][j] = 1;
     nextFigure = new Figure();
     currentFigure = nextFigure;
     myTimer = new Date().getTime();
@@ -133,7 +136,7 @@ function putDown() { // положить фигура
     for (i = 0; i < 3; ++i)
         for (j = 0; j < 3; ++j) {
             if (currentFigure.data[i][j] != 0)
-                gameBoard[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
+                board[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
         }
     currentFigure = nextFigure;
     nextFigure = new Figure();
@@ -157,7 +160,7 @@ function checkFilled() {
         var isFullLine = true;
         var isEmptyLine = true;
         for (var j = 1; j < M - 1; ++j) {
-            if (gameBoard[i][j] == 0)
+            if (board[i][j] == 0)
                 isFullLine = false;
             else
                 isEmptyLine = false;
@@ -171,7 +174,7 @@ function checkFilled() {
                     isPresent = true;
             if (!isPresent) {
                 for(var j=1;j<M-1;j++)
-                    gameBoard[i][j]=0;
+                    board[i][j]=0;
                 clearingRows.push(new ClearAnimInfo(i));
                 isNeedPlayClearSound = true;
             }
@@ -190,7 +193,7 @@ function animateRemoval()
             for(var k = 1; k < M-1; k++) {
                 drawContext.drawImage(resources.get('img/rem.png'),
                     frameIdx * 64, 0, 64, 64,
-                    gameBoardPosX+k*cellWidth, gameBoardPosY + clearingRows[i].row * cellHeight,
+                    boardPosX+k*cellWidth, boardPosY + clearingRows[i].row * cellHeight,
                     cellWidth, cellHeight);
             }
             clearingRows[i].cnt--;
@@ -199,7 +202,7 @@ function animateRemoval()
             //удаление строки
             var k;
             for (k = clearingRows[i].row; k > 0; --k)
-                gameBoard[k] = gameBoard[k - 1].slice();
+                board[k] = board[k - 1].slice();
             for (k = i + 1; k < clearingRows.length; ++k)
                 clearingRows[k].row++;
             clearingRows.splice(i, 1);
@@ -218,7 +221,7 @@ function checkOverlap(figure) {
     var i, j;
     for (i = 0; i < 3; ++i)
         for (j = 0; j < 3; ++j) {
-            if (figure.data[i][j] != 0 && gameBoard[figure.i + i][figure.j + j] != 0)
+            if (figure.data[i][j] != 0 && board[figure.i + i][figure.j + j] != 0)
                 return true;
         }
     return false;
@@ -268,23 +271,23 @@ function drawBlock(idx, x, y) {
 function drawBoard() {
     // blocks
     var i, j;
+    //for (i = 0; i < 2; i++)
+    //    for (j = 0; j < M; j++)
+    //        drawBlock(1,
+    //            boardPosX + j * cellHeight,
+    //            i * cellWidth, cellWidth, cellHeight);
     for (i = 0; i < N; ++i) {
         for (j = 0; j < M; ++j) {
-            //if (gameBoard[i][j] != 0)
-                drawBlock(gameBoard[i][j],
-                    gameBoardPosX + j * cellHeight,
-                    gameBoardPosY + i * cellWidth, cellWidth, cellHeight);
+            //if (board[i][j] != 0)
+                drawBlock(board[i][j],
+                    boardPosX + j * cellHeight,
+                    boardPosY + i * cellWidth, cellWidth, cellHeight);
         }
     }
 }
 
 var lastLoop = new Date().getTime();
 function drawInfo() {
-    for(var i=0;i<2;i++)
-        for(var j=0;j<M;j++)
-            drawBlock(1,
-                gameBoardPosX + j * cellHeight,
-                i * cellWidth, cellWidth , cellHeight);
     var info = "";
     if (showFps) {
         var thisLoop = new Date().getTime();
@@ -292,16 +295,25 @@ function drawInfo() {
         lastLoop = thisLoop;
         info = fps.toFixed(1) + ' fps ';
     }
-    info += ' Score: ' + score;
+    //drawContext.lineWidth = 5;
     drawContext.fillStyle = "#ffffff";
-    drawContext.textAlign = "left";
-    drawContext.fillText(info, gameBoardPosX, cellHeight);
+    roundRect(drawContext,
+        boardPosX + boardWidth + cellWidth, boardPosY + cellHeight,
+        infoPanelWidth - 2 * cellWidth, 2 * cellHeight, cellWidth / 2, true, false);
+    var d = 5;
+    roundRect(drawContext,
+        boardPosX + boardWidth + cellWidth + d, boardPosY + cellHeight + d,
+        infoPanelWidth - 2 * cellWidth - 2 * d, 2 * cellHeight - 2 * d, cellWidth / 2 - d, false, true);
+    drawContext.textAlign = "center";
+    drawContext.fillText("SCORE", boardPosX + boardWidth + infoPanelWidth / 2, boardPosY + cellHeight);
+    drawContext.fillStyle = "#000000";
+    drawContext.fillText( score, boardPosX + boardWidth + infoPanelWidth / 2, boardPosY + 2 * cellHeight);
 }
 
 function drawFigure(figure, x, y) {
     if (arguments.length < 3 ) {
-        x = gameBoardPosX + figure.j * cellWidth;
-        y = gameBoardPosY + figure.i * cellHeight;
+        x = boardPosX + figure.j * cellWidth;
+        y = boardPosY + figure.i * cellHeight;
     }
     else {
         BLOCK_SIZE = 64;
@@ -321,26 +333,27 @@ function drawFigure(figure, x, y) {
 }
 
 function draw() {
+    drawContext.fillStyle = "#343629";
+    drawContext.fillRect(0, 0, myCanvas.width, myCanvas.height);
+    drawContext.drawImage(resources.get('img/bg.png'),
+        boardPosX + boardWidth, boardPosY + 2 * cellHeight, 10 * cellWidth, 5 * cellHeight);
+    drawBoard();
     switch (gameState) {
         case GAME_STATE.MENU:
             {
-                drawBoard();
-                drawContext.fillStyle = "##ffffff";
+                drawContext.fillStyle = "#ffffff";
                 drawContext.textAlign = "center";
-                var str = "Press to start.";
-                drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
+                drawContext.fillText("Press to start.", myCanvas.width / 2, myCanvas.height / 2);
             } break;
         case GAME_STATE.PLAY:
             {
-                drawContext.textAlign = "left";
-                drawBoard();
                 drawFigure(currentFigure);
                 if (clearingRows.length > 0)
                     animateRemoval();
             } break;
         case GAME_STATE.GAME_OVER:
             {
-                drawContext.fillStyle = "##ffffff";
+                drawContext.fillStyle = "#ffffff";
                 drawContext.textAlign = "center";
                 var str = "You result: " + score;
                 drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
@@ -350,7 +363,7 @@ function draw() {
                     storage['bestScore'] = bestScore = score;
             } break;
     }
-    drawFigure(nextFigure, gameBoardPosX + cellWidth * M, gameBoardPosY);
+    drawFigure(nextFigure, boardPosX + boardWidth + cellWidth, boardPosY + boardHeight - 4 * cellHeight);
     drawInfo();
 }
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32 };
