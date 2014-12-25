@@ -369,15 +369,18 @@ function draw() {
                     animateRemoval();
             } break;
         case GAME_STATE.PAUSE:
-        {
-            drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
-            drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
-            drawText("resume", myCanvas.width / 2 - 3 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
-        } break;
+            {
+                drawFigure(currentFigure);
+                drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
+                drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
+                drawText("resume", myCanvas.width / 2 - 3 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
+            } break;
         case GAME_STATE.GAME_OVER:
             {
-                drawText("You result:", myCanvas.width / 2 - 5.5 * cellSize, myCanvas.height / 2 - cellSize);
-                drawText(score.toString(), myCanvas.width / 2 - score.toString().length / 2 * cellSize, myCanvas.height / 2);
+                drawText("Game", myCanvas.width / 2 - 2 * cellSize, myCanvas.height / 2 - 5 * cellSize, cellSize);
+                drawText("Over", myCanvas.width / 2 - 2 * cellSize, myCanvas.height / 2 - 4 * cellSize, cellSize);
+                drawText("Result", myCanvas.width / 2 - 3 * cellSize, myCanvas.height / 2 - 1 * cellSize, cellSize);
+                drawText(score.toString(), myCanvas.width / 2 - score.toString().length / 2 * cellSize, myCanvas.height / 2, cellSize);
                 //var str = "Record: " + bestScore;
                 //drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2+30);
                 if (score > bestScore)
