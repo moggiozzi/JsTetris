@@ -29,9 +29,9 @@ var bgColor3 = "#D0DBBD";
 function resizeCanvas() {
     myCanvas.width = window.innerWidth;
     myCanvas.height = window.innerHeight;
-    cellSize = Math.floor(Math.min(myCanvas.width / M, (myCanvas.height) / (N + 2)));
+    cellSize = Math.floor(Math.min(myCanvas.width / M, (myCanvas.height) / (N + 4)));
     boardPosX = Math.floor((myCanvas.width - cellSize * M) / 2);
-    boardPosY = cellSize * 2;
+    boardPosY = cellSize * 3;
     boardWidth = cellSize * M;
     boardHeight = cellSize * N;
     infoPanelWidth = boardWidth;
@@ -276,16 +276,35 @@ function drawBlock(idx, x, y) {
 }
 
 function drawBoard() {
+    drawContext.fillStyle = bgColor2;
+    drawContext.fillRect( boardPosX - cellSize, boardPosY - 2 * cellSize,
+        boardWidth + 2 * cellSize, boardHeight + 3 * cellSize);
     drawContext.fillStyle = bgColor3;
-    drawContext.fillRect(boardPosX, boardPosY, boardWidth, boardHeight);
+    var d = cellSize / 8;
+    //drawContext.fillRect(boardPosX, boardPosY, boardWidth, boardHeight);
+    drawContext.fillRect( boardPosX + cellSize - d, boardPosY - d,
+        boardWidth - 2 * cellSize + 2 * d, boardHeight - cellSize + 2 * d,
+    //cornerRect( drawContext,
+    //    boardPosX + cellSize - d, boardPosY - d,
+    //    boardWidth - 2 * cellSize + 2 * d, boardHeight - cellSize + 2 * d,
+        d, true, false );
     var i, j;
-    for (i = 0; i < N; ++i) {
-        for (j = 0; j < M; ++j) {
+    for (i = 0; i < N-1; ++i) {
+        for (j = 1; j < M-1; ++j) {
             if (board[i][j] != 0)
                 drawBlock(board[i][j],
                     boardPosX + j * cellSize,
                     boardPosY + i * cellSize, cellSize, cellSize);
         }
+    }
+    for(i = 0; i < N + 3; i++ )
+    {
+        drawBlock(1,
+            boardPosX - 2 * cellSize,
+            boardPosY + i * cellSize - 2 * cellSize, cellSize, cellSize);
+        drawBlock(1,
+            boardPosX + boardWidth + cellSize,
+            boardPosY + i * cellSize - 2 * cellSize, cellSize, cellSize);
     }
 }
 
@@ -299,7 +318,7 @@ function drawInfo() {
         info = fps.toFixed(1) + " fps ";
     }
     drawContext.fillStyle = bgColor1;
-    var x = boardPosX+boardWidth,
+    var x = boardPosX+boardWidth+2*cellSize,
         y = 3 * cellSize;
     drawContext.fillStyle = bgColor3;
     drawContext.fillRect(x, y, infoPanelWidth, 4.5 * cellSize);
@@ -387,7 +406,7 @@ function draw() {
                     storage["bestScore"] = bestScore = score;
             } break;
     }
-    drawFigure(nextFigure, boardPosX + boardWidth + cellSize, boardPosY + boardHeight - 4 * cellSize);
+    drawFigure(nextFigure, boardPosX + boardWidth + 3 * cellSize, boardPosY + boardHeight - 4 * cellSize);
     drawInfo();
 }
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27 };
