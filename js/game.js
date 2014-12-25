@@ -2,7 +2,7 @@
 
 var N = 20; // количество строк
 var M = 10; // количество столбцов
-var cellWidth, cellHeight;
+var cellSize;
 var board;
 var boardPosX, boardPosY, boardWidth, boardHeight, infoPanelWidth;
 var gameState;
@@ -20,7 +20,7 @@ var bestScore = 0;
 var MOVE = { LEFT: 1, RIGHT: 2, DOWN: 3, MOVE: 4, DROP: 5 };
 var nextMove = 0;
 var myCanvas = document.getElementById("myCanvas");
-var drawContext = myCanvas.getContext('2d');
+var drawContext = myCanvas.getContext("2d");
 
 var bgColor1 = "#343629";
 var bgColor2 = "#6B7353";
@@ -29,12 +29,11 @@ var bgColor3 = "#D0DBBD";
 function resizeCanvas() {
     myCanvas.width = window.innerWidth;
     myCanvas.height = window.innerHeight;
-    cellWidth = cellHeight = Math.floor(Math.min(myCanvas.width / M, (myCanvas.height) / (N + 2)));
-    drawContext.font = cellWidth.toString() + 'px Arial';
-    boardPosX = Math.floor((myCanvas.width - cellWidth * M) / 2);
-    boardPosY = cellHeight * 2;
-    boardWidth = cellWidth * M;
-    boardHeight = cellHeight * N;
+    cellSize = Math.floor(Math.min(myCanvas.width / M, (myCanvas.height) / (N + 2)));
+    boardPosX = Math.floor((myCanvas.width - cellSize * M) / 2);
+    boardPosY = cellSize * 2;
+    boardWidth = cellSize * M;
+    boardHeight = cellSize * N;
     infoPanelWidth = boardWidth;
 }
 var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
@@ -51,7 +50,7 @@ function loadPage() {
 }
 function initGame() {
     storage = window.localStorage;
-    bestScore = storage['bestScore'] || 0;
+    bestScore = storage["bestScore"] || 0;
 
     resources.load(["img/blocks.png","img/tetris.png","img/rem.png","img/font32.png"]);
 
@@ -136,7 +135,7 @@ function doStep() {
     }
 }
 function putDown() { // положить фигура
-    playSound('drop');
+    playSound("drop");
     // "положить" фигуру на поле
     var i, j;
     for (i = 0; i < 3; ++i)
@@ -187,7 +186,7 @@ function checkFilled() {
         }
     }
     if (isNeedPlayClearSound)
-        playSound('clear');
+        playSound("clear");
 }
 function animateRemoval()
 {
@@ -197,10 +196,10 @@ function animateRemoval()
         if (clearingRows[i].cnt > 0) {
             var frameIdx = 10 - clearingRows[i].cnt;
             for(var k = 1; k < M-1; k++) {
-                drawContext.drawImage(resources.get('img/rem.png'),
+                drawContext.drawImage(resources.get("img/rem.png"),
                     frameIdx * 64, 0, 64, 64,
-                    boardPosX+k*cellWidth, boardPosY + clearingRows[i].row * cellHeight,
-                    cellWidth, cellHeight);
+                    boardPosX+k*cellSize, boardPosY + clearingRows[i].row * cellSize,
+                    cellSize, cellSize);
             }
             clearingRows[i].cnt--;
             i++;
@@ -239,7 +238,7 @@ function tryMove(figure, di, dj) {
     movedFigure.i += di;
     movedFigure.j += dj;
     if (checkOverlap(movedFigure) == false) {
-        //playSound('move');
+        //playSound("move");
         figure.i = movedFigure.i;
         figure.j = movedFigure.j;
         return true;
@@ -269,9 +268,9 @@ function drawBlock(idx, x, y) {
     var BLOCK_SIZE = 64;
     var i = Math.floor( idx / 8 );
     var j = idx % 8;
-    drawContext.drawImage(resources.get('img/blocks.png'),
+    drawContext.drawImage(resources.get("img/blocks.png"),
         j * BLOCK_SIZE, i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
-        x, y, cellWidth, cellHeight);
+        x, y, cellSize, cellSize);
 }
 
 function drawBoard() {
@@ -282,8 +281,8 @@ function drawBoard() {
         for (j = 0; j < M; ++j) {
             if (board[i][j] != 0)
                 drawBlock(board[i][j],
-                    boardPosX + j * cellHeight,
-                    boardPosY + i * cellWidth, cellWidth, cellHeight);
+                    boardPosX + j * cellSize,
+                    boardPosY + i * cellSize, cellSize, cellSize);
         }
     }
 }
@@ -295,57 +294,57 @@ function drawInfo() {
         var thisLoop = new Date().getTime();
         var fps = 1000 / (thisLoop - lastLoop);
         lastLoop = thisLoop;
-        info = fps.toFixed(1) + ' fps ';
+        info = fps.toFixed(1) + " fps ";
     }
     drawContext.fillStyle = bgColor1;
     var x = boardPosX+boardWidth,
-        y = 3 * cellHeight;
+        y = 3 * cellSize;
     drawContext.fillStyle = bgColor3;
-    drawContext.fillRect(x, y, infoPanelWidth, 4.5 * cellHeight);
+    drawContext.fillRect(x, y, infoPanelWidth, 4.5 * cellSize);
     drawContext.fillStyle = bgColor2;
-    drawContext.fillRect(x, y + cellHeight / 4, infoPanelWidth, 1.5 * cellHeight);
-    drawContext.fillRect(x, y + 2 * cellHeight, infoPanelWidth, cellHeight / 4);
-    drawContext.fillRect(x, y + 4 * cellHeight, infoPanelWidth, cellHeight / 4);
+    drawContext.fillRect(x, y + cellSize / 4, infoPanelWidth, 1.5 * cellSize);
+    drawContext.fillRect(x, y + 2 * cellSize, infoPanelWidth, cellSize / 4);
+    drawContext.fillRect(x, y + 4 * cellSize, infoPanelWidth, cellSize / 4);
     drawContext.fillStyle = bgColor3;
-    var d = cellHeight/8;
+    var d = cellSize/8;
     cornerRect(drawContext,
-        x + cellWidth, y - cellHeight,
-        infoPanelWidth - 2 * cellWidth, 2 * cellHeight, d, true, false);
+        x + cellSize, y - cellSize,
+        infoPanelWidth - 2 * cellSize, 2 * cellSize, d, true, false);
     drawContext.lineWidth = d/2;
     drawContext.fillStyle = bgColor2;
     cornerRect(drawContext,
-        x + cellWidth + d, y - cellHeight + d,
-        infoPanelWidth - 2 * cellWidth - 2 * d, 2 * cellHeight - 2 * d, d, false, true);
+        x + cellSize + d, y - cellSize + d,
+        infoPanelWidth - 2 * cellSize - 2 * d, 2 * cellSize - 2 * d, d, false, true);
     drawContext.fillStyle = bgColor1;
     drawContext.textAlign = "center";
-    drawContext.fillText("SCORE", x + infoPanelWidth / 2, y);
-    drawContext.fillText( score, x + infoPanelWidth / 2, y + 3 * cellHeight);
+    drawText("SCORE", x + infoPanelWidth / 2 - 2.5 * cellSize, y - 0.5 * cellSize, cellSize);
+    drawText(score.toString(), x + infoPanelWidth / 2 - score.toString().length/2 * cellSize, y + 2.5 * cellSize, cellSize);
 }
 
 function drawFigure(figure, x, y) {
     if (arguments.length < 3 ) {
-        x = boardPosX + figure.j * cellWidth;
-        y = boardPosY + figure.i * cellHeight;
+        x = boardPosX + figure.j * cellSize;
+        y = boardPosY + figure.i * cellSize;
     }
     else {
-        var d = cellHeight / 8;
+        var d = cellSize / 8;
         drawContext.fillStyle = bgColor3;
         cornerRect(drawContext,
             x - 2 * d, y - 2 * d,
-            3 * cellWidth + 4 * d, 3 * cellHeight + 4 * d, d, true, false);
+            3 * cellSize + 4 * d, 3 * cellSize + 4 * d, d, true, false);
         drawContext.lineWidth = d/2;
         drawContext.fillStyle = bgColor1;
         cornerRect(drawContext,
             x - d, y - d,
-            3 * cellWidth + 2 * d, 3 * cellHeight + 2 * d, d, false, true);
+            3 * cellSize + 2 * d, 3 * cellSize + 2 * d, d, false, true);
     }
     var i, j;
     for (i = 0; i < 3; ++i) {
         for (j = 0; j < 3; ++j) {
             if (figure.data[i][j] != 0)
                 drawBlock(figure.data[i][j],
-                    x + j * cellHeight,
-                    y + i * cellWidth, cellWidth, cellHeight);
+                    x + j * cellSize,
+                    y + i * cellSize, cellSize, cellSize);
         }
     }
 }
@@ -357,9 +356,9 @@ function draw() {
     switch (gameState) {
         case GAME_STATE.MENU:
             {
-                drawContext.fillStyle = "#ffffff";
-                drawContext.textAlign = "center";
-                drawContext.fillText("Press to start.", myCanvas.width / 2, myCanvas.height / 2);
+                drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
+                drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
+                drawText("start", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
             } break;
         case GAME_STATE.PLAY:
             {
@@ -369,23 +368,21 @@ function draw() {
             } break;
         case GAME_STATE.PAUSE:
         {
-            drawContext.fillStyle = "#ffffff";
-            drawContext.textAlign = "center";
-            drawContext.fillText("Press to resume.", myCanvas.width / 2, myCanvas.height / 2);
+            drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
+            drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
+            drawText("resume", myCanvas.width / 2 - 3 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
         } break;
         case GAME_STATE.GAME_OVER:
             {
-                drawContext.fillStyle = "#ffffff";
-                drawContext.textAlign = "center";
-                var str = "You result: " + score;
-                drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2);
-                var str = "Record: " + bestScore;
-                drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2+30);
+                drawText("You result:", myCanvas.width / 2 - 5.5 * cellSize, myCanvas.height / 2 - cellSize);
+                drawText(score.toString(), myCanvas.width / 2 - score.toString().length / 2 * cellSize, myCanvas.height / 2);
+                //var str = "Record: " + bestScore;
+                //drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2+30);
                 if (score > bestScore)
-                    storage['bestScore'] = bestScore = score;
+                    storage["bestScore"] = bestScore = score;
             } break;
     }
-    drawFigure(nextFigure, boardPosX + boardWidth + cellWidth, boardPosY + boardHeight - 4 * cellHeight);
+    drawFigure(nextFigure, boardPosX + boardWidth + cellSize, boardPosY + boardHeight - 4 * cellSize);
     drawInfo();
 }
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27 };
@@ -434,4 +431,26 @@ var MB_LEFT = 1;
 function mouseDown() {
     //if (event.button == MB_LEFT)
     nextMove = MOVE.ROTATE;
+}
+
+function drawText(str, x, y, size) {
+    var frameRow = 0;
+    for (var i = 0; i < str.length; i++) {
+        var frameIdx = -1;
+        if ("A".charCodeAt(0) <= str.charCodeAt(i) && str.charCodeAt(i) <= "Z".charCodeAt(0))
+            frameIdx = str.charCodeAt(i) - "A".charCodeAt(0);
+        else
+            if ("a".charCodeAt(0) <= str.charCodeAt(i) && str.charCodeAt(i) <= "z".charCodeAt(0))
+                frameIdx = str.charCodeAt(i) - "a".charCodeAt(0);
+            else
+                if ("0".charCodeAt(0) <= str.charCodeAt(i) && str.charCodeAt(i) <= "9".charCodeAt(0)) {
+                    frameIdx = str.charCodeAt(i) - "0".charCodeAt(0);
+                    frameRow = 1;
+                }
+        if ( frameIdx >= 0 )
+            drawContext.drawImage(resources.get("img/font32.png"),
+                frameIdx * 32, frameRow * 32, 32, 32,
+                x + i * size, y,
+                size, size);
+    }
 }
