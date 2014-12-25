@@ -1,6 +1,6 @@
 ﻿var MAX_COLOR_CODE = 5;// blocks.png
 var FIGURE_CODE = { CUBE: 0, LINE: 1, VISOR1: 2, VISOR2: 3, STAIR1: 4, STAIR2: 5, LEDGE: 6 };
-var MAX_FIGURE_CODE = 7
+var MAX_FIGURE_CODE = 6
 function Figure() {
     this.code = Math.round(Math.random() * MAX_FIGURE_CODE);
     this.colorCode = Math.round(Math.random() * MAX_COLOR_CODE)+2;
@@ -51,8 +51,7 @@ function Figure() {
                 [0, c, 0],
             ];
             break;
-            //case FIGURE_CODE.CUBE:
-        default:
+        case FIGURE_CODE.CUBE:
             this.data = [
                 [0, c, c],
                 [0, c, c],

@@ -145,6 +145,9 @@ function putDown() { // положить фигура
         }
     currentFigure = nextFigure;
     nextFigure = new Figure();
+    var rotateCnt = Math.round(Math.random() * 3)
+    for (i = 0; i < rotateCnt; ++i)
+        tryTurn(nextFigure);
     if (checkOverlap(currentFigure)) {
         gameState = GAME_STATE.GAME_OVER;
     }
@@ -266,10 +269,9 @@ function tryTurn(figure) {
 
 function drawBlock(idx, x, y) {
     var BLOCK_SIZE = 64;
-    var i = Math.floor( idx / 8 );
-    var j = idx % 8;
+    var i = idx-1;
     drawContext.drawImage(resources.get("img/blocks.png"),
-        j * BLOCK_SIZE, i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
+        i * BLOCK_SIZE, 0, BLOCK_SIZE, BLOCK_SIZE,
         x, y, cellSize, cellSize);
 }
 
@@ -437,13 +439,13 @@ function drawText(str, x, y, size) {
     var frameRow = 0;
     for (var i = 0; i < str.length; i++) {
         var frameIdx = -1;
-        if ("A".charCodeAt(0) <= str.charCodeAt(i) && str.charCodeAt(i) <= "Z".charCodeAt(0))
+        if ("A".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "Z".charCodeAt())
             frameIdx = str.charCodeAt(i) - "A".charCodeAt(0);
         else
-            if ("a".charCodeAt(0) <= str.charCodeAt(i) && str.charCodeAt(i) <= "z".charCodeAt(0))
+            if ("a".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "z".charCodeAt())
                 frameIdx = str.charCodeAt(i) - "a".charCodeAt(0);
             else
-                if ("0".charCodeAt(0) <= str.charCodeAt(i) && str.charCodeAt(i) <= "9".charCodeAt(0)) {
+                if ("0".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "9".charCodeAt()) {
                     frameIdx = str.charCodeAt(i) - "0".charCodeAt(0);
                     frameRow = 1;
                 }
