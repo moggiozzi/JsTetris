@@ -20,6 +20,8 @@
 }
 var isWebKit = false;
 function playSound(id) {
+    if ( soundsOn == false )
+        return;
     if (isWebKit) {
         playSoundForWebKit(id);
         return;

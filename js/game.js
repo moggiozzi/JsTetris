@@ -1,4 +1,5 @@
 ﻿var sounds = [];
+var soundsOn = false;
 
 var N = 20; // количество строк
 var M = 10; // количество столбцов
@@ -223,6 +224,8 @@ function animateRemoval()
         score += 500;
     if (clearedCount == 1)
         score += 100;
+    if (score / 10000 > speed )
+        speed = Math.min( 9, Math.floor(score/10000));
 }
 
 function checkOverlap(figure) {
