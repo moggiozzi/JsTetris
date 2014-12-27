@@ -88,4 +88,27 @@ function Rect(x_,y_,w_,h_) {
     this.h = h_ || 0;
     this.x2 = function(){return this.x+this.w;}
     this.y2 = function(){return this.y+this.h;}
+    this.cx = function(){return this.x+this.w/2;}
+    this.cy = function(){return this.y+this.h/2;}
+}
+
+function AnimatedRect(start_, stop_, framesCount_)
+{
+    this.dx = (stop_.x - start_.x)/10;
+    this.dy = (stop_.y - start_.y)/10;
+    this.dw = (stop_.w - start_.w)/10;
+    this.dh = (stop_.h - start_.h)/10;
+    this.stop = stop_;
+    this.curr = start_;
+    this.framesCount = framesCount_ || 10;
+    this.next = function(){
+        if ( Math.abs( this.curr.x - this.stop.x ) > Math.abs(this.dx) )
+            this.curr.x += this.dx;
+        if ( Math.abs( this.curr.y - this.stop.y ) > Math.abs(this.dy) )
+            this.curr.y += this.dy;
+        if ( Math.abs( this.curr.w - this.stop.w ) > Math.abs(this.dw) )
+            this.curr.w += this.dw;
+        if ( Math.abs( this.curr.h - this.stop.h ) > Math.abs(this.dh) )
+            this.curr.h += this.dh;
+    }
 }

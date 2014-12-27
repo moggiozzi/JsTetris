@@ -22,6 +22,7 @@ var MOVE = { LEFT: 1, RIGHT: 2, DOWN: 3, MOVE: 4, DROP: 5 };
 var nextMove = 0;
 var myCanvas = document.getElementById("myCanvas");
 var drawContext = myCanvas.getContext("2d");
+var animRect;
 
 var bgColor1 = "#343629";
 var bgColor2 = "#6B7353";
@@ -394,6 +395,8 @@ function draw() {
             } break;
         case GAME_STATE.PAUSE:
             {
+                animRect.next();
+                drawMyRect( animRect.curr.x, animRect.curr.y, animRect.curr.w, animRect.curr.h );
                 drawFigure(currentFigure);
                 drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
                 drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
@@ -441,6 +444,9 @@ function keyDown() {
                         break;
                     case KEY.ESC:
                         gameState = GAME_STATE.PAUSE;
+                        animRect = new AnimatedRect(
+                            new Rect(boardRect.cx(),boardRect.cy(),0,0),
+                            new Rect(boardRect.cx() - 3 * cellSize, boardRect.cy() - 3 * cellSize,6 * cellSize,6 * cellSize));
                         break;
                 }
             } break;
