@@ -90,6 +90,9 @@ function Rect(x_,y_,w_,h_) {
     this.y2 = function(){return this.y+this.h;}
     this.cx = function(){return this.x+this.w/2;}
     this.cy = function(){return this.y+this.h/2;}
+    this.eq = function(r){
+        return this.x == r.x && this.y == r.y &&
+            this.w == r.w && this.h == r.h; }
 }
 
 function AnimatedRect(start_, stop_, framesCount_)
@@ -102,13 +105,22 @@ function AnimatedRect(start_, stop_, framesCount_)
     this.curr = start_;
     this.framesCount = framesCount_ || 10;
     this.next = function(){
-        if ( Math.abs( this.curr.x - this.stop.x ) > Math.abs(this.dx) )
+        if ( Math.abs( this.curr.x - this.stop.x ) >= Math.abs(this.dx) )
             this.curr.x += this.dx;
-        if ( Math.abs( this.curr.y - this.stop.y ) > Math.abs(this.dy) )
+        else
+            this.curr.x = this.stop.x;
+        if ( Math.abs( this.curr.y - this.stop.y ) >= Math.abs(this.dy) )
             this.curr.y += this.dy;
-        if ( Math.abs( this.curr.w - this.stop.w ) > Math.abs(this.dw) )
+        else
+            this.curr.y = this.stop.y
+        if ( Math.abs( this.curr.w - this.stop.w ) >= Math.abs(this.dw) )
             this.curr.w += this.dw;
-        if ( Math.abs( this.curr.h - this.stop.h ) > Math.abs(this.dh) )
+        else
+            this.curr.w = this.stop.w;
+        if ( Math.abs( this.curr.h - this.stop.h ) >= Math.abs(this.dh) )
             this.curr.h += this.dh;
+        else
+            this.curr.h = this.stop.h;
     }
+    this.isAnimFinish = function(){return this.curr.eq(this.stop);}
 }

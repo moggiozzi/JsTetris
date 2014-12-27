@@ -26,7 +26,8 @@ var animRect;
 
 var bgColor1 = "#343629";
 var bgColor2 = "#6B7353";
-var bgColor3 = "#D0DBBD";
+var bgColor3 = "#C4CFA1";
+var bgColor4 = "#D0DBBD";
 
 function resizeCanvas() {
     myCanvas.width = window.innerWidth;
@@ -155,6 +156,9 @@ function putDown() { // положить фигура
         tryTurn(nextFigure);
     if (checkOverlap(currentFigure)) {
         gameState = GAME_STATE.GAME_OVER;
+        animRect = new AnimatedRect(
+            new Rect(boardRect.cx(),boardRect.cy(),0,0),
+            new Rect(boardRect.cx() - 3.5 * cellSize, boardRect.cy() - 4 * cellSize, 7 * cellSize, 8 * cellSize));
     }
     checkFilled();
 }
@@ -286,13 +290,9 @@ function drawBoard() {
     drawContext.fillStyle = bgColor2;
     drawContext.fillRect( boardRect.x - cellSize, boardRect.y - 2 * cellSize,
         boardRect.w + 2 * cellSize, boardRect.h + 3 * cellSize);
-    drawContext.fillStyle = bgColor3;
-    //drawContext.fillRect(boardRect.x, boardRect.y, boardRect.w, boardRect.h);
+    drawContext.fillStyle = bgColor4;
     drawContext.fillRect( boardRect.x + cellSize - cornerSize, boardRect.y - cornerSize,
         boardRect.w - 2 * cellSize + 2 * cornerSize, boardRect.h - cellSize + 2 * cornerSize,
-    //cornerRect( drawContext,
-    //    boardRect.x + cellSize - cornerSize, boardRect.y - cornerSize,
-    //    boardRect.w - 2 * cellSize + 2 * cornerSize, boardRect.h - cellSize + 2 * cornerSize,
         cornerSize, true, false );
     var i, j;
     for (i = 0; i < N-1; ++i) {
@@ -314,8 +314,8 @@ function drawBoard() {
     }
 }
 
-function drawMyRect(x,y,w,h){
-    drawContext.fillStyle = bgColor3;
+function drawMyRect(x,y,w,h,col){
+    drawContext.fillStyle = col || bgColor4;
     cornerRect(drawContext, x, y, w, h, cornerSize, true, false);
     drawContext.fillStyle = bgColor2;
     cornerRect(drawContext, x + cornerSize, y + cornerSize,
@@ -334,7 +334,7 @@ function drawInfo() {
     var x = boardRect.x2()+2*cellSize,
         y = 3 * cellSize;
 
-    drawContext.fillStyle = bgColor3;
+    drawContext.fillStyle = bgColor4;
     drawContext.fillRect(x, y, infoPanelWidth, 4 * cellSize);
     drawContext.fillStyle = bgColor2;
     drawContext.fillRect(x, y + cellSize / 4, infoPanelWidth, 1.5 * cellSize);
@@ -395,23 +395,35 @@ function draw() {
             } break;
         case GAME_STATE.PAUSE:
             {
-                animRect.next();
-                drawMyRect( animRect.curr.x, animRect.curr.y, animRect.curr.w, animRect.curr.h );
                 drawFigure(currentFigure);
-                drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
-                drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
-                drawText("resume", myCanvas.width / 2 - 3 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
+                animRect.next();
+                drawContext.globalAlpha = 0.8;
+                drawMyRect( animRect.curr.x, animRect.curr.y, animRect.curr.w, animRect.curr.h, bgColor3 );
+                drawContext.globalAlpha = 1;
+                if ( animRect.isAnimFinish() ) {
+                    drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
+                    drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
+                    drawText("resume", myCanvas.width / 2 - 3 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
+                }
             } break;
         case GAME_STATE.GAME_OVER:
             {
-                drawText("Game", myCanvas.width / 2 - 2 * cellSize, myCanvas.height / 2 - 5 * cellSize, cellSize);
-                drawText("Over", myCanvas.width / 2 - 2 * cellSize, myCanvas.height / 2 - 4 * cellSize, cellSize);
-                drawText("Result", myCanvas.width / 2 - 3 * cellSize, myCanvas.height / 2 - 1 * cellSize, cellSize);
-                drawText(score.toString(), myCanvas.width / 2 - score.toString().length / 2 * cellSize, myCanvas.height / 2, cellSize);
-                //var str = "Record: " + bestScore;
-                //drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2+30);
-                if (score > bestScore)
-                    storage["bestScore"] = bestScore = score;
+                animRect.next();
+                drawContext.globalAlpha = 0.8;
+                drawMyRect( animRect.curr.x, animRect.curr.y, animRect.curr.w, animRect.curr.h, bgColor3 );
+                drawContext.globalAlpha = 1;
+                if ( animRect.isAnimFinish() ) {
+                    drawText("Game", boardRect.cx() - 2 * cellSize, boardRect.cy() - 3 * cellSize, cellSize);
+                    drawText("Over", boardRect.cx() - 2 * cellSize, boardRect.cy() - 2 * cellSize, cellSize);
+                    drawText("Result", boardRect.cx() - 3 * cellSize, boardRect.cy() + 1 * cellSize, cellSize);
+                    drawText(score.toString(),
+                        boardRect.cx() - score.toString().length / 2 * cellSize,
+                        boardRect.cy() + 2 * cellSize, cellSize);
+                    //var str = "Record: " + bestScore;
+                    //drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2+30);
+                    if (score > bestScore)
+                        storage["bestScore"] = bestScore = score;
+                }
             } break;
     }
     drawInfo();
@@ -446,7 +458,7 @@ function keyDown() {
                         gameState = GAME_STATE.PAUSE;
                         animRect = new AnimatedRect(
                             new Rect(boardRect.cx(),boardRect.cy(),0,0),
-                            new Rect(boardRect.cx() - 3 * cellSize, boardRect.cy() - 3 * cellSize,6 * cellSize,6 * cellSize));
+                            new Rect(boardRect.cx() - 3.5 * cellSize, boardRect.cy() - 3.5 * cellSize, 7 * cellSize,7 * cellSize));
                         break;
                 }
             } break;
@@ -469,6 +481,9 @@ function mouseDown() {
 
 function drawText(str, x, y, size) {
     var frameRow = 0;
+    x = Math.floor(x);
+    y = Math.floor(y);
+    size = Math.floor(size);
     for (var i = 0; i < str.length; i++) {
         var frameIdx = -1;
         if ("A".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "Z".charCodeAt())
