@@ -80,3 +80,12 @@ function cornerRect(ctx, x, y, width, height, radius, fill, stroke) {
         ctx.fill();
     }
 }
+
+function Rect(x_,y_,w_,h_) {
+    this.x = x_ || 0;
+    this.y = y_ || 0;
+    this.w = w_ || 0;
+    this.h = h_ || 0;
+    this.x2 = function(){return this.x+this.w;}
+    this.y2 = function(){return this.y+this.h;}
+}

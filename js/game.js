@@ -5,7 +5,7 @@ var N = 20; // количество строк
 var M = 10; // количество столбцов
 var cellSize;
 var board;
-var boardPosX, boardPosY, boardWidth, boardHeight, infoPanelWidth;
+var boardRect, infoPanelWidth;
 var gameState;
 var nextFigure = new Figure();
 var currentFigure = nextFigure;
@@ -31,11 +31,12 @@ function resizeCanvas() {
     myCanvas.width = window.innerWidth;
     myCanvas.height = window.innerHeight;
     cellSize = Math.floor(Math.min(myCanvas.width / M, (myCanvas.height) / (N + 4)));
-    boardPosX = Math.floor((myCanvas.width - cellSize * M) / 2);
-    boardPosY = cellSize * 3;
-    boardWidth = cellSize * M;
-    boardHeight = cellSize * N;
-    infoPanelWidth = boardWidth;
+    boardRect = new Rect(
+        Math.floor((myCanvas.width - cellSize * M) / 2),
+        cellSize * 3,
+        cellSize * M,
+        cellSize * N );
+    infoPanelWidth = cellSize * M;
 }
 var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
 function loadPage() {
@@ -202,7 +203,7 @@ function animateRemoval()
             for(var k = 1; k < M-1; k++) {
                 drawContext.drawImage(resources.get("img/rem.png"),
                     frameIdx * 64, 0, 64, 64,
-                    boardPosX+k*cellSize, boardPosY + clearingRows[i].row * cellSize,
+                    boardRect.x+k*cellSize, boardRect.y + clearingRows[i].row * cellSize,
                     cellSize, cellSize);
             }
             clearingRows[i].cnt--;
@@ -280,34 +281,34 @@ function drawBlock(idx, x, y) {
 
 function drawBoard() {
     drawContext.fillStyle = bgColor2;
-    drawContext.fillRect( boardPosX - cellSize, boardPosY - 2 * cellSize,
-        boardWidth + 2 * cellSize, boardHeight + 3 * cellSize);
+    drawContext.fillRect( boardRect.x - cellSize, boardRect.y - 2 * cellSize,
+        boardRect.w + 2 * cellSize, boardRect.h + 3 * cellSize);
     drawContext.fillStyle = bgColor3;
     var d = cellSize / 8;
-    //drawContext.fillRect(boardPosX, boardPosY, boardWidth, boardHeight);
-    drawContext.fillRect( boardPosX + cellSize - d, boardPosY - d,
-        boardWidth - 2 * cellSize + 2 * d, boardHeight - cellSize + 2 * d,
+    //drawContext.fillRect(boardRect.x, boardRect.y, boardRect.w, boardRect.h);
+    drawContext.fillRect( boardRect.x + cellSize - d, boardRect.y - d,
+        boardRect.w - 2 * cellSize + 2 * d, boardRect.h - cellSize + 2 * d,
     //cornerRect( drawContext,
-    //    boardPosX + cellSize - d, boardPosY - d,
-    //    boardWidth - 2 * cellSize + 2 * d, boardHeight - cellSize + 2 * d,
+    //    boardRect.x + cellSize - d, boardRect.y - d,
+    //    boardRect.w - 2 * cellSize + 2 * d, boardRect.h - cellSize + 2 * d,
         d, true, false );
     var i, j;
     for (i = 0; i < N-1; ++i) {
         for (j = 1; j < M-1; ++j) {
             if (board[i][j] != 0)
                 drawBlock(board[i][j],
-                    boardPosX + j * cellSize,
-                    boardPosY + i * cellSize, cellSize, cellSize);
+                    boardRect.x + j * cellSize,
+                    boardRect.y + i * cellSize, cellSize, cellSize);
         }
     }
     for(i = 0; i < N + 3; i++ )
     {
         drawBlock(1,
-            boardPosX - 2 * cellSize,
-            boardPosY + i * cellSize - 2 * cellSize, cellSize, cellSize);
+            boardRect.x - 2 * cellSize,
+            boardRect.y + i * cellSize - 2 * cellSize, cellSize, cellSize);
         drawBlock(1,
-            boardPosX + boardWidth + cellSize,
-            boardPosY + i * cellSize - 2 * cellSize, cellSize, cellSize);
+            boardRect.x2() + cellSize,
+            boardRect.y + i * cellSize - 2 * cellSize, cellSize, cellSize);
     }
 }
 
@@ -321,7 +322,7 @@ function drawInfo() {
         info = fps.toFixed(1) + " fps ";
     }
     drawContext.fillStyle = bgColor1;
-    var x = boardPosX+boardWidth+2*cellSize,
+    var x = boardRect.x2()+2*cellSize,
         y = 3 * cellSize;
     drawContext.fillStyle = bgColor3;
     drawContext.fillRect(x, y, infoPanelWidth, 4.5 * cellSize);
@@ -347,8 +348,8 @@ function drawInfo() {
 
 function drawFigure(figure, x, y) {
     if (arguments.length < 3 ) {
-        x = boardPosX + figure.j * cellSize;
-        y = boardPosY + figure.i * cellSize;
+        x = boardRect.x + figure.j * cellSize;
+        y = boardRect.y + figure.i * cellSize;
     }
     else {
         var d = cellSize / 8;
@@ -409,7 +410,7 @@ function draw() {
                     storage["bestScore"] = bestScore = score;
             } break;
     }
-    drawFigure(nextFigure, boardPosX + boardWidth + 3 * cellSize, boardPosY + boardHeight - 4 * cellSize);
+    drawFigure(nextFigure, boardRect.x2() + 3 * cellSize, boardRect.y2() - 4 * cellSize);
     drawInfo();
 }
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27 };
