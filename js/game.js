@@ -36,8 +36,9 @@ function resizeCanvas() {
         cellSize * 3,
         cellSize * M,
         cellSize * N );
-    infoPanelWidth = cellSize * M;
-    cornerSize = cellSize/8;
+    infoPanelWidth = cellSize * (M - 2);
+    cornerSize = Math.floor( cellSize/8 );
+    drawContext.lineWidth = Math.ceil( cornerSize / 2 );
 }
 var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
 function loadPage() {
@@ -312,6 +313,13 @@ function drawBoard() {
     }
 }
 
+function drawMyRect(x,y,w,h){
+    drawContext.fillStyle = bgColor3;
+    cornerRect(drawContext, x, y, w, h, cornerSize, true, false);
+    drawContext.fillStyle = bgColor2;
+    cornerRect(drawContext, x + cornerSize, y + cornerSize,
+        w - 2 * cornerSize, h - 2 * cornerSize, cornerSize, false, true);
+}
 var lastLoop = new Date().getTime();
 function drawInfo() {
     var info = "";
@@ -324,54 +332,37 @@ function drawInfo() {
     drawContext.fillStyle = bgColor1;
     var x = boardRect.x2()+2*cellSize,
         y = 3 * cellSize;
+
     drawContext.fillStyle = bgColor3;
     drawContext.fillRect(x, y, infoPanelWidth, 4 * cellSize);
     drawContext.fillStyle = bgColor2;
     drawContext.fillRect(x, y + cellSize / 4, infoPanelWidth, 1.5 * cellSize);
     drawContext.fillRect(x, y + 1.5 * cellSize, infoPanelWidth, cellSize / 4);
     drawContext.fillRect(x, y + 3.5 * cellSize, infoPanelWidth, cellSize / 4);
-    drawContext.fillStyle = bgColor3;
 
-    cornerRect(drawContext,
-        x + cellSize, y - cellSize,
-        infoPanelWidth - 2 * cellSize, 2 * cellSize, cornerSize, true, false);
-    drawContext.lineWidth = cornerSize/2;
-    drawContext.fillStyle = bgColor2;
-    cornerRect(drawContext,
-        x + cellSize + cornerSize, y - cellSize + cornerSize,
-        infoPanelWidth - 2 * cellSize - 2 * cornerSize, 2 * cellSize - 2 * cornerSize, cornerSize, false, true);
-    drawText("SCORE", x + infoPanelWidth / 2 - 2.5 * cellSize, y - 0.5 * cellSize, cellSize);
+    var px = x + cellSize;
+    var pw = infoPanelWidth - 2 * cellSize;
+    drawMyRect( px, y - cellSize, pw, 2 * cellSize );
+    var str = "SCORE";
+    drawText(str, px + pw / 2 - str.length / 2 * cellSize, y - 0.5 * cellSize, cellSize);
     drawText(score.toString(), x + infoPanelWidth / 2 - score.toString().length/2 * cellSize, y + 2 * cellSize, cellSize);
 
-    drawContext.fillStyle = bgColor3;
-    cornerRect(drawContext,
-        x + cellSize, y + 6 * cellSize,
-        infoPanelWidth - 2 * cellSize, 2 * cellSize, cornerSize, true, false);
-    drawContext.fillStyle = bgColor2;
-    cornerRect(drawContext,
-        x + cellSize + cornerSize, y + 6 * cellSize + cornerSize,
-        infoPanelWidth - 2 * cellSize - 2 * cornerSize, 2 * cellSize - 2 * cornerSize, cornerSize, false, true);
-    //drawContext.fillStyle = bgColor1;
-    drawText("LEVEL " + speed, x + infoPanelWidth/2 - 3.5 * cellSize, y + 6.5 * cellSize,
-        cellSize );
-    //drawText(score.toString(), x + infoPanelWidth / 2 - score.toString().length/2 * cellSize, y + 2.5 * cellSize, cellSize);
+    drawMyRect( px, y + 6 * cellSize, pw, 3 * cellSize );
+    str = "LEVEL";
+    drawText( str, x + infoPanelWidth/2 - str.length / 2 * cellSize, y + 6.5 * cellSize, cellSize );
+    str = speed.toString();
+    drawText( str, x + infoPanelWidth/2 - str.length / 2 * cellSize, y + 7.5 * cellSize, cellSize );
+
+    drawMyRect( px, y + 10 * cellSize - cornerSize, pw, 4 * cellSize + 2 * cornerSize );
+    str = "NEXT";
+    drawText( str, x + infoPanelWidth/2 - str.length / 2 * cellSize, y + 10 * cellSize, cellSize );
+    drawFigure( nextFigure, px + 2 * cellSize, y + 11 * cellSize);
 }
 
 function drawFigure(figure, x, y) {
     if (arguments.length < 3 ) {
         x = boardRect.x + figure.j * cellSize;
         y = boardRect.y + figure.i * cellSize;
-    }
-    else {
-        drawContext.fillStyle = bgColor3;
-        cornerRect(drawContext,
-            x - 2 * cornerSize, y - 2 * cornerSize,
-            3 * cellSize + 4 * cornerSize, 3 * cellSize + 4 * cornerSize, cornerSize, true, false);
-        drawContext.lineWidth = cornerSize/2;
-        drawContext.fillStyle = bgColor1;
-        cornerRect(drawContext,
-            x - cornerSize, y - cornerSize,
-            3 * cellSize + 2 * cornerSize, 3 * cellSize + 2 * cornerSize, cornerSize, false, true);
     }
     var i, j;
     for (i = 0; i < 3; ++i) {
@@ -420,7 +411,6 @@ function draw() {
                     storage["bestScore"] = bestScore = score;
             } break;
     }
-    drawFigure(nextFigure, boardRect.x2() + 3 * cellSize, boardRect.y2() - 4 * cellSize);
     drawInfo();
 }
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27 };
