@@ -357,7 +357,13 @@ function drawInfo() {
     drawMyRect( px, y + 10 * cellSize - cornerSize, pw, 4 * cellSize + 2 * cornerSize );
     str = "NEXT";
     drawText( str, x + infoPanelWidth/2 - str.length / 2 * cellSize, y + 10 * cellSize, cellSize );
-    drawFigure( nextFigure, px + 2 * cellSize, y + 11 * cellSize);
+    var fx = px + 1.5 * cellSize;
+    var fy = y + 11 * cellSize;
+    if (nextFigure.isLeft())   fx += 0.5 * cellSize;
+    if (nextFigure.isRight())  fx -= 0.5 * cellSize;
+    if (nextFigure.isTop())    fy += 0.5 * cellSize;
+    if (nextFigure.isBottom()) fy -= 0.5 * cellSize;
+    drawFigure( nextFigure, fx, fy);
 }
 
 function drawFigure(figure, x, y) {

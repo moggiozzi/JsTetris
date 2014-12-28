@@ -59,6 +59,10 @@ function Figure() {
             ];
             break;
     }
+    this.isLeft = function(){ return this.data[0][2] == 0 && this.data[1][2] == 0 && this.data[2][2] == 0; }
+    this.isRight = function(){ return this.data[0][0] == 0 && this.data[1][0] == 0 && this.data[2][0] == 0; }
+    this.isTop = function(){ return this.data[2][0] == 0 && this.data[2][1] == 0 && this.data[2][2] == 0; }
+    this.isBottom = function(){ return this.data[0][0] == 0 && this.data[0][1] == 0 && this.data[0][2] == 0; }
 }
 function copyFigure(figureDst, figureSrc) {
     figureDst.code = figureSrc.code;
