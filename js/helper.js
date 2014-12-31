@@ -95,32 +95,32 @@ function Rect(x_,y_,w_,h_) {
             this.w == r.w && this.h == r.h; }
 }
 
-function AnimatedRect(start_, stop_, framesCount_)
+function AnimatedRect(startRect_, stopRect_, framesCount_)
 {
-    this.dx = (stop_.x - start_.x)/10;
-    this.dy = (stop_.y - start_.y)/10;
-    this.dw = (stop_.w - start_.w)/10;
-    this.dh = (stop_.h - start_.h)/10;
-    this.stop = stop_;
-    this.curr = start_;
+    this.dx = Math.round((stopRect_.x - startRect_.x)/10);
+    this.dy = Math.round((stopRect_.y - startRect_.y) / 10);
+    this.dw = Math.round((stopRect_.w - startRect_.w) / 10);
+    this.dh = Math.round((stopRect_.h - startRect_.h) / 10);
+    this.stopRect = stopRect_;
+    this.currRect = startRect_;
     this.framesCount = framesCount_ || 10;
     this.next = function(){
-        if ( Math.abs( this.curr.x - this.stop.x ) >= Math.abs(this.dx) )
-            this.curr.x += this.dx;
+        if (Math.abs(this.currRect.x - this.stopRect.x) >= Math.abs(this.dx))
+            this.currRect.x += this.dx;
         else
-            this.curr.x = this.stop.x;
-        if ( Math.abs( this.curr.y - this.stop.y ) >= Math.abs(this.dy) )
-            this.curr.y += this.dy;
+            this.currRect.x = this.stopRect.x;
+        if (Math.abs(this.currRect.y - this.stopRect.y) >= Math.abs(this.dy))
+            this.currRect.y += this.dy;
         else
-            this.curr.y = this.stop.y
-        if ( Math.abs( this.curr.w - this.stop.w ) >= Math.abs(this.dw) )
-            this.curr.w += this.dw;
+            this.currRect.y = this.stopRect.y
+        if (Math.abs(this.currRect.w - this.stopRect.w) >= Math.abs(this.dw))
+            this.currRect.w += this.dw;
         else
-            this.curr.w = this.stop.w;
-        if ( Math.abs( this.curr.h - this.stop.h ) >= Math.abs(this.dh) )
-            this.curr.h += this.dh;
+            this.currRect.w = this.stopRect.w;
+        if (Math.abs(this.currRect.h - this.stopRect.h) >= Math.abs(this.dh))
+            this.currRect.h += this.dh;
         else
-            this.curr.h = this.stop.h;
+            this.currRect.h = this.stopRect.h;
     }
-    this.isAnimFinish = function(){return this.curr.eq(this.stop);}
+    this.isAnimFinish = function(){return this.currRect.eq(this.stopRect);}
 }

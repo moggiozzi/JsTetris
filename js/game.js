@@ -404,7 +404,7 @@ function draw() {
                 drawFigure(currentFigure);
                 animRect.next();
                 drawContext.globalAlpha = 0.8;
-                drawMyRect( animRect.curr.x, animRect.curr.y, animRect.curr.w, animRect.curr.h, bgColor3 );
+                drawMyRect( animRect.currRect.x, animRect.currRect.y, animRect.currRect.w, animRect.currRect.h, bgColor3 );
                 drawContext.globalAlpha = 1;
                 if ( animRect.isAnimFinish() ) {
                     drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
@@ -416,7 +416,7 @@ function draw() {
             {
                 animRect.next();
                 drawContext.globalAlpha = 0.8;
-                drawMyRect( animRect.curr.x, animRect.curr.y, animRect.curr.w, animRect.curr.h, bgColor3 );
+                drawMyRect( animRect.currRect.x, animRect.currRect.y, animRect.currRect.w, animRect.currRect.h, bgColor3 );
                 drawContext.globalAlpha = 1;
                 if ( animRect.isAnimFinish() ) {
                     drawText("Game", boardRect.cx() - 2 * cellSize, boardRect.cy() - 3 * cellSize, cellSize);
