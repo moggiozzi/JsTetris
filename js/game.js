@@ -24,7 +24,7 @@ var myCanvas = document.getElementById("myCanvas");
 var drawContext = myCanvas.getContext("2d");
 var animRect;
 var animText = null;
-
+var lasti,lastj; // координаты упавшей фигуры (используется для анимации получения очков)
 var bgColor1 = "#343629";
 var bgColor2 = "#6B7353";
 var bgColor3 = "#C4CFA1";
@@ -150,6 +150,8 @@ function putDown() { // положить фигура
             if (currentFigure.data[i][j] != 0)
                 board[currentFigure.i + i][currentFigure.j + j] = currentFigure.data[i][j];
         }
+    lasti = currentFigure.i;
+    lastj = currentFigure.j;
     currentFigure = nextFigure;
     nextFigure = new Figure();
     var rotateCnt = Math.round(Math.random() * 3)
@@ -238,7 +240,13 @@ function animateRemoval()
     if (dScore > 0) {
         if (score / 10000 + 1 > speed)
             speed = Math.min(9, Math.floor(score / 10000 + 1));
-        animText = new AnimatedText(dScore.toString(),10,100,1,0);
+        animText = new AnimatedText(dScore.toString(),
+            new Rect(boardRect.x + lastj * cellSize - score.toString().length/2 * cellSize/2,
+                boardRect.y + lasti * cellSize,
+                score.toString().length * cellSize/2, cellSize/2),
+            new Rect(boardRect.x + lastj * cellSize - score.toString().length/2 * cellSize,
+                boardRect.y + lasti * cellSize - cellSize,
+                score.toString().length * cellSize, cellSize));
     }
 }
 
@@ -442,7 +450,7 @@ function draw() {
     if (animText != null) {
         animText.next();
         drawContext.globalAlpha = animText.currAlpha;
-        drawText(animText.text, 0, 0, animText.currSize);
+        drawTextInRect(animText.text, animText.animRect.currRect);
         drawContext.globalAlpha = 1;
         if (animText.isAnimFinish())
             animText = null;
@@ -509,6 +517,30 @@ function drawText(str, x, y, size) {
         if ("A".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "Z".charCodeAt())
             frameIdx = str.charCodeAt(i) - "A".charCodeAt(0);
         else
+        if ("a".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "z".charCodeAt())
+            frameIdx = str.charCodeAt(i) - "a".charCodeAt(0);
+        else
+        if ("0".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "9".charCodeAt()) {
+            frameIdx = str.charCodeAt(i) - "0".charCodeAt(0);
+            frameRow = 1;
+        }
+        if ( frameIdx >= 0 )
+            drawContext.drawImage(resources.get("img/font32.png"),
+                frameIdx * 32, frameRow * 32, 32, 32,
+                x + i * size, y,
+                size, size);
+    }
+}
+
+function drawTextInRect(str, rect) {
+    var frameRow = 0;
+    var gw = Math.floor( rect.w / str.length );
+    var gh = Math.floor( rect.h );
+    for (var i = 0; i < str.length; i++) {
+        var frameIdx = -1;
+        if ("A".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "Z".charCodeAt())
+            frameIdx = str.charCodeAt(i) - "A".charCodeAt(0);
+        else
             if ("a".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "z".charCodeAt())
                 frameIdx = str.charCodeAt(i) - "a".charCodeAt(0);
             else
@@ -519,7 +551,7 @@ function drawText(str, x, y, size) {
         if ( frameIdx >= 0 )
             drawContext.drawImage(resources.get("img/font32.png"),
                 frameIdx * 32, frameRow * 32, 32, 32,
-                x + i * size, y,
-                size, size);
+                rect.x + i * gw, rect.y,
+                gw, gh);
     }
 }

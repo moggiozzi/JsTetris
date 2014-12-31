@@ -125,24 +125,19 @@ function AnimatedRect(startRect_, stopRect_, framesCount_)
     this.isAnimFinish = function(){return this.currRect.eq(this.stopRect);}
 }
 
-function AnimatedText(text_, startSize_, stopSize_, startAlpha_, stopAlpha_, framesCount_) {
+function AnimatedText(text_, startRect_, stopRect_, startAlpha_, stopAlpha_, framesCount_) {
     this.text = text_;
-    this.currSize = startSize_;
-    this.stopSize = stopSize_;
     this.currAlpha = startAlpha_ || 1;
     this.stopAlpha = stopAlpha_ || 0;
     this.framesCount = framesCount_ || 10;
-    this.dSize = Math.round((this.stopSize - this.currSize) / this.framesCount);
+    this.animRect = new AnimatedRect(startRect_,stopRect_,this.framesCount_);
     this.dAlpha = (this.stopAlpha - this.currAlpha) / this.framesCount;
     this.next = function () {
-        if (Math.abs(this.currSize - this.stopSize) >= Math.abs(this.dSize))
-            this.currSize += this.dSize;
-        else
-            this.currSize = this.stopSize;
+        this.animRect.next();
         if (Math.abs(this.currAlpha - this.stopAlpha) >= Math.abs(this.dAlpha))
             this.currAlpha += this.dAlpha;
         else
             this.currAlpha = this.stopAlpha;
     }
-    this.isAnimFinish = function () { return this.currSize == this.stopSize && this.currAlpha == this.stopAlpha; }
+    this.isAnimFinish = function () { return this.animRect.isAnimFinish() && this.currAlpha == this.stopAlpha; }
 }
