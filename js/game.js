@@ -240,6 +240,8 @@ function animateRemoval()
     if (dScore > 0) {
         if (score / 10000 + 1 > speed)
             speed = Math.min(9, Math.floor(score / 10000 + 1));
+        lastj++;
+        if ( lastj < 2 ) lastj = 2; // чтоб оказаться в пределах игрового поля
         animText = new AnimatedText(dScore.toString(),
             new Rect(boardRect.x + lastj * cellSize - score.toString().length/2 * cellSize/2,
                 boardRect.y + lasti * cellSize,
