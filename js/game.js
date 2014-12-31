@@ -23,6 +23,7 @@ var nextMove = 0;
 var myCanvas = document.getElementById("myCanvas");
 var drawContext = myCanvas.getContext("2d");
 var animRect;
+var animText = null;
 
 var bgColor1 = "#343629";
 var bgColor2 = "#6B7353";
@@ -226,14 +227,19 @@ function animateRemoval()
             clearedCount++;
         }
     }
+    var dScore = 0;
     if (clearedCount > 2)
-        score += 2000;
+        dScore = 2500;
     if (clearedCount > 1)
-        score += 500;
+        dScore += 500;
     if (clearedCount == 1)
-        score += 100;
-    if (score / 10000 + 1 > speed )
-        speed = Math.min( 9, Math.floor(score/10000 + 1));
+        dScore += 100;
+    score += dScore;
+    if (dScore > 0) {
+        if (score / 10000 + 1 > speed)
+            speed = Math.min(9, Math.floor(score / 10000 + 1));
+        animText = new AnimatedText(dScore.toString(),10,100,1,0);
+    }
 }
 
 function checkOverlap(figure) {
@@ -433,6 +439,14 @@ function draw() {
             } break;
     }
     drawInfo();
+    if (animText != null) {
+        animText.next();
+        drawContext.globalAlpha = animText.currAlpha;
+        drawText(animText.text, 0, 0, animText.currSize);
+        drawContext.globalAlpha = 1;
+        if (animText.isAnimFinish())
+            animText = null;
+    }
 }
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27 };
 function keyDown() {

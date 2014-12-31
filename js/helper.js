@@ -97,13 +97,13 @@ function Rect(x_,y_,w_,h_) {
 
 function AnimatedRect(startRect_, stopRect_, framesCount_)
 {
-    this.dx = Math.round((stopRect_.x - startRect_.x)/10);
-    this.dy = Math.round((stopRect_.y - startRect_.y) / 10);
-    this.dw = Math.round((stopRect_.w - startRect_.w) / 10);
-    this.dh = Math.round((stopRect_.h - startRect_.h) / 10);
+    this.framesCount = framesCount_ || 10;
+    this.dx = Math.round((stopRect_.x - startRect_.x) / this.framesCount);
+    this.dy = Math.round((stopRect_.y - startRect_.y) / this.framesCount);
+    this.dw = Math.round((stopRect_.w - startRect_.w) / this.framesCount);
+    this.dh = Math.round((stopRect_.h - startRect_.h) / this.framesCount);
     this.stopRect = stopRect_;
     this.currRect = startRect_;
-    this.framesCount = framesCount_ || 10;
     this.next = function(){
         if (Math.abs(this.currRect.x - this.stopRect.x) >= Math.abs(this.dx))
             this.currRect.x += this.dx;
@@ -123,4 +123,26 @@ function AnimatedRect(startRect_, stopRect_, framesCount_)
             this.currRect.h = this.stopRect.h;
     }
     this.isAnimFinish = function(){return this.currRect.eq(this.stopRect);}
+}
+
+function AnimatedText(text_, startSize_, stopSize_, startAlpha_, stopAlpha_, framesCount_) {
+    this.text = text_;
+    this.currSize = startSize_;
+    this.stopSize = stopSize_;
+    this.currAlpha = startAlpha_ || 1;
+    this.stopAlpha = stopAlpha_ || 0;
+    this.framesCount = framesCount_ || 10;
+    this.dSize = Math.round((this.stopSize - this.currSize) / this.framesCount);
+    this.dAlpha = (this.stopAlpha - this.currAlpha) / this.framesCount;
+    this.next = function () {
+        if (Math.abs(this.currSize - this.stopSize) >= Math.abs(this.dSize))
+            this.currSize += this.dSize;
+        else
+            this.currSize = this.stopSize;
+        if (Math.abs(this.currAlpha - this.stopAlpha) >= Math.abs(this.dAlpha))
+            this.currAlpha += this.dAlpha;
+        else
+            this.currAlpha = this.stopAlpha;
+    }
+    this.isAnimFinish = function () { return this.currSize == this.stopSize && this.currAlpha == this.stopAlpha; }
 }
