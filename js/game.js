@@ -17,6 +17,7 @@ var MAX_SPEED = 30;
 var showFps = true;
 var score = 0;
 var bestScore = 0;
+var scoreBoard;
 
 var MOVE = { LEFT: 1, RIGHT: 2, DOWN: 3, MOVE: 4, DROP: 5 };
 var nextMove = 0;
@@ -242,7 +243,7 @@ function animateRemoval()
             speed = Math.min(9, Math.floor(score / 10000 + 1));
         lastj++;
         if ( lastj < 2 ) lastj = 2; // чтоб оказаться в пределах игрового поля
-        animText = new AnimatedText(dScore.toString(),
+        animText = new AnimatedText("+" + dScore.toString(),
             new Rect(boardRect.x + lastj * cellSize - score.toString().length/2 * cellSize/2,
                 boardRect.y + lasti * cellSize,
                 score.toString().length * cellSize/2, cellSize/2),
@@ -507,53 +508,4 @@ var MB_LEFT = 1;
 function mouseDown() {
     //if (event.button == MB_LEFT)
     nextMove = MOVE.ROTATE;
-}
-
-function drawText(str, x, y, size) {
-    var frameRow = 0;
-    x = Math.floor(x);
-    y = Math.floor(y);
-    size = Math.floor(size);
-    for (var i = 0; i < str.length; i++) {
-        var frameIdx = -1;
-        if ("A".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "Z".charCodeAt())
-            frameIdx = str.charCodeAt(i) - "A".charCodeAt(0);
-        else
-        if ("a".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "z".charCodeAt())
-            frameIdx = str.charCodeAt(i) - "a".charCodeAt(0);
-        else
-        if ("0".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "9".charCodeAt()) {
-            frameIdx = str.charCodeAt(i) - "0".charCodeAt(0);
-            frameRow = 1;
-        }
-        if ( frameIdx >= 0 )
-            drawContext.drawImage(resources.get("img/font32.png"),
-                frameIdx * 32, frameRow * 32, 32, 32,
-                x + i * size, y,
-                size, size);
-    }
-}
-
-function drawTextInRect(str, rect) {
-    var frameRow = 0;
-    var gw = Math.floor( rect.w / str.length );
-    var gh = Math.floor( rect.h );
-    for (var i = 0; i < str.length; i++) {
-        var frameIdx = -1;
-        if ("A".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "Z".charCodeAt())
-            frameIdx = str.charCodeAt(i) - "A".charCodeAt(0);
-        else
-            if ("a".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "z".charCodeAt())
-                frameIdx = str.charCodeAt(i) - "a".charCodeAt(0);
-            else
-                if ("0".charCodeAt() <= str.charCodeAt(i) && str.charCodeAt(i) <= "9".charCodeAt()) {
-                    frameIdx = str.charCodeAt(i) - "0".charCodeAt(0);
-                    frameRow = 1;
-                }
-        if ( frameIdx >= 0 )
-            drawContext.drawImage(resources.get("img/font32.png"),
-                frameIdx * 32, frameRow * 32, 32, 32,
-                rect.x + i * gw, rect.y,
-                gw, gh);
-    }
 }

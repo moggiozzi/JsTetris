@@ -141,3 +141,30 @@ function AnimatedText(text_, startRect_, stopRect_, startAlpha_, stopAlpha_, fra
     }
     this.isAnimFinish = function () { return this.animRect.isAnimFinish() && this.currAlpha == this.stopAlpha; }
 }
+
+function drawText(str, x, y, size) {
+    x = Math.floor(x);
+    y = Math.floor(y);
+    size = Math.floor(size);
+    for (var i = 0; i < str.length; i++) {
+        var frameIdx = Math.floor( str.charCodeAt(i) % 16 );
+        var frameRow = Math.floor( str.charCodeAt(i) / 16 );
+        drawContext.drawImage(resources.get("img/font32.png"),
+            frameIdx * 32, frameRow * 32, 32, 32,
+            x + i * size, y,
+            size, size);
+    }
+}
+
+function drawTextInRect(str, rect) {
+    var gw = Math.floor( rect.w / str.length );
+    var gh = Math.floor( rect.h );
+    for (var i = 0; i < str.length; i++) {
+        var frameIdx = Math.floor(str.charCodeAt(i) % 16);
+        var frameRow = Math.floor(str.charCodeAt(i) / 16);
+        drawContext.drawImage(resources.get("img/font32.png"),
+            frameIdx * 32, frameRow * 32, 32, 32,
+            rect.x + i * gw, rect.y,
+            gw, gh);
+    }
+}
