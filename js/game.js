@@ -83,7 +83,7 @@ function initGame() {
     score = 0;
     nextMove = 0;
 
-    gameState = GAME_STATE.MENU;
+    setGameState( GAME_STATE.MENU );
 }
 
 function doStep() {
@@ -143,7 +143,7 @@ function doStep() {
     }
 }
 function putDown() { // положить фигура
-    playSound("drop");
+    playSound("./sounds/drop.wav");
     // "положить" фигуру на поле
     var i, j;
     for (i = 0; i < 3; ++i)
@@ -159,10 +159,7 @@ function putDown() { // положить фигура
     for (i = 0; i < rotateCnt; ++i)
         tryTurn(nextFigure);
     if (checkOverlap(currentFigure)) {
-        gameState = GAME_STATE.GAME_OVER;
-        animRect = new AnimatedRect(
-            new Rect(boardRect.cx(),boardRect.cy(),0,0),
-            new Rect(boardRect.cx() - 3.5 * cellSize, boardRect.cy() - 4 * cellSize, 7 * cellSize, 8 * cellSize));
+        setGameState(GAME_STATE.GAME_OVER);
     }
     checkFilled();
 }
@@ -202,7 +199,7 @@ function checkFilled() {
         }
     }
     if (isNeedPlayClearSound)
-        playSound("clear");
+        playSound("./sounds/clear.wav");
 }
 function animateRemoval()
 {
@@ -269,7 +266,7 @@ function tryMove(figure, di, dj) {
     movedFigure.i += di;
     movedFigure.j += dj;
     if (checkOverlap(movedFigure) == false) {
-        //playSound("move");
+        //playSound("./sounds/move.wav");
         figure.i = movedFigure.i;
         figure.j = movedFigure.j;
         return true;
@@ -464,8 +461,7 @@ function keyDown() {
     switch (gameState) {
         case GAME_STATE.MENU:
             {
-                gameState = GAME_STATE.PLAY;
-                nextFigure = new Figure();
+                setGameState( GAME_STATE.PLAY );
             } break;
         case GAME_STATE.PLAY:
             {
@@ -486,21 +482,18 @@ function keyDown() {
                         nextMove = MOVE.DROP;
                         break;
                     case KEY.ESC:
-                        gameState = GAME_STATE.PAUSE;
-                        animRect = new AnimatedRect(
-                            new Rect(boardRect.cx(),boardRect.cy(),0,0),
-                            new Rect(boardRect.cx() - 3.5 * cellSize, boardRect.cy() - 3.5 * cellSize, 7 * cellSize,7 * cellSize));
+                        setGameState( GAME_STATE.PAUSE );
                         break;
                 }
             } break;
         case GAME_STATE.PAUSE:
         {
-            gameState = GAME_STATE.PLAY;
+            setGameState( GAME_STATE.PLAY );
         }break;
         case GAME_STATE.GAME_OVER:
             {
                 initGame();
-                gameState = GAME_STATE.MENU;
+                setGameState( GAME_STATE.MENU );
             } break;
     }
 }
@@ -508,4 +501,28 @@ var MB_LEFT = 1;
 function mouseDown() {
     //if (event.button == MB_LEFT)
     nextMove = MOVE.ROTATE;
+}
+function setGameState(gs)
+{
+    if ( gameState != gs )
+    {
+        switch (gs)
+        {
+            case GAME_STATE.GAME_OVER:
+                animRect = new AnimatedRect(
+                    new Rect(boardRect.cx(), boardRect.cy(), 0, 0),
+                    new Rect(boardRect.cx() - 3.5 * cellSize, boardRect.cy() - 4 * cellSize, 7 * cellSize, 8 * cellSize));
+                break;
+            case GAME_STATE.PLAY:
+                nextFigure = new Figure();
+                playSound("./sounds/music.mp3",true);
+                break;
+            case GAME_STATE.PAUSE:
+                animRect = new AnimatedRect(
+                    new Rect(boardRect.cx(), boardRect.cy(), 0, 0),
+                    new Rect(boardRect.cx() - 3.5 * cellSize, boardRect.cy() - 3.5 * cellSize, 7 * cellSize, 7 * cellSize));
+                break;
+        }
+        gameState = gs;
+    }
 }
