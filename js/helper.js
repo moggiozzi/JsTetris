@@ -93,6 +93,8 @@ function Rect(x_,y_,w_,h_) {
     this.eq = function(r){
         return this.x == r.x && this.y == r.y &&
             this.w == r.w && this.h == r.h; }
+    this.isContain = function(x,y){
+        return this.x < x && x < this.x2() && this.y < y && y < this.y2(); }
 }
 
 function AnimatedRect(startRect_, stopRect_, framesCount_)

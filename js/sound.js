@@ -27,14 +27,23 @@ function playSound(id,isLoop) {
         playSoundForWebKit(id);
         return;
     }
-    var element = document.getElementById(id);
     if (sounds[id] == undefined) {
         sounds[id] = new Audio( id );
         sounds[id].loop = isLoop;
         sounds[id].load();
     }
-    if (sounds[id].played.length == 0 || sounds[id].ended)
+    //if (sounds[id].played.length == 0 || sounds[id].ended)
         sounds[id].play();
+}
+function stopSound(id) {
+    if (isWebKit) {
+        stopSoundForWebKit(id);
+        return;
+    }
+    if (sounds[id] == undefined)
+        return;
+    sounds[id].pause();
+    sounds[id].currentTime = 0;
 }
 
 function playSoundForWebKit(id) {

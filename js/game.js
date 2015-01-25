@@ -1,5 +1,6 @@
 ﻿var sounds = [];
 var soundsOn = false;
+var soundButtonRect;
 
 var N = 20; // количество строк
 var M = 10; // количество столбцов
@@ -43,6 +44,7 @@ function resizeCanvas() {
     infoPanelWidth = cellSize * (M - 2);
     cornerSize = Math.floor( cellSize/8 );
     drawContext.lineWidth = Math.ceil( cornerSize / 2 );
+    soundButtonRect = new Rect( 0, 0, 2*cellSize,2*cellSize);
 }
 var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
 function loadPage() {
@@ -60,7 +62,7 @@ function initGame() {
     storage = window.localStorage;
     bestScore = storage["bestScore"] || 0;
 
-    resources.load(["img/blocks.png","img/tetris.png","img/rem.png","img/font32.png"]);
+    resources.load(["img/blocks.png","img/tetris.png","img/rem.png","img/font32.png","img/icons.png"]);
 
     var i, j;
     board = new Array(N);
@@ -378,6 +380,20 @@ function drawInfo() {
     if (nextFigure.isTop())    fy += 0.5 * cellSize;
     if (nextFigure.isBottom()) fy -= 0.5 * cellSize;
     drawFigure( nextFigure, fx, fy);
+
+    soundButtonRect.x = x + cellSize;
+    soundButtonRect.y = boardRect.y2() - cellSize;
+    drawMyRect( soundButtonRect.x, soundButtonRect.y, soundButtonRect.w, soundButtonRect.h );
+    if ( soundsOn )
+        drawContext.drawImage(resources.get("img/icons.png"),
+            0, 0, 64, 64,
+            soundButtonRect.x, soundButtonRect.y,
+            soundButtonRect.w, soundButtonRect.h);
+    else
+        drawContext.drawImage(resources.get("img/icons.png"),
+            64, 0, 64, 64,
+            soundButtonRect.x, soundButtonRect.y,
+            soundButtonRect.w, soundButtonRect.h);
 }
 
 function drawFigure(figure, x, y) {
@@ -500,7 +516,9 @@ function keyDown() {
 var MB_LEFT = 1;
 function mouseDown() {
     //if (event.button == MB_LEFT)
-    nextMove = MOVE.ROTATE;
+    //nextMove = MOVE.ROTATE;
+    if ( soundButtonRect.isContain(event.pageX,event.pageY))
+        changeSoundState();
 }
 function setGameState(gs)
 {
@@ -525,4 +543,12 @@ function setGameState(gs)
         }
         gameState = gs;
     }
+}
+function changeSoundState()
+{
+    soundsOn = !soundsOn;
+    if ( soundsOn )
+        playSound("./sounds/music.mp3",true);
+    else
+        stopSound("./sounds/music.mp3");
 }
