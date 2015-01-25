@@ -24,7 +24,7 @@ function playSound(id,isLoop) {
     if ( soundsOn == false )
         return;
     if (isWebKit) {
-        playSoundForWebKit(id);
+        playSoundForWebKit(id, isLoop);
         return;
     }
     if (sounds[id] == undefined) {
@@ -46,7 +46,7 @@ function stopSound(id) {
     sounds[id].currentTime = 0;
 }
 
-function playSoundForWebKit(id) {
+function playSoundForWebKit(id,isLoop) {
     var source = context.createBufferSource(); // может не стоит каждый раз вызывать?
     var idx = 0;
     switch (id) { // fixme сделать список звуков
@@ -57,5 +57,17 @@ function playSoundForWebKit(id) {
     }
     source.buffer = window.bufferLoader.bufferList[idx];
     source.connect(context.destination);
+    source.loop = isLoop;
     source.start(0);
+}
+function stopSoundForWebKit(id) {
+    var idx = 0;
+    switch (id) { // fixme сделать список звуков
+        case "./sounds/move.wav": idx = 0; break;
+        case "./sounds/drop.wav": idx = 1; break;
+        case "./sounds/clear.wav": idx = 2; break;
+        case "./sounds/music.mp3": idx = 3; break;
+        default : return;
+    }
+    window.bufferLoader.bufferList[idx].pause();
 }
