@@ -1,8 +1,4 @@
-﻿var sounds = [];
-var soundsOn = false;
-var soundButtonRect;
-
-var N = 20; // количество строк
+﻿var N = 20; // количество строк
 var M = 10; // количество столбцов
 var cellSize;
 var board;
@@ -44,13 +40,11 @@ function resizeCanvas() {
     infoPanelWidth = cellSize * (M - 2);
     cornerSize = Math.floor( cellSize/8 );
     drawContext.lineWidth = Math.ceil( cornerSize / 2 );
-    soundButtonRect = new Rect( 0, 0, 2*cellSize,2*cellSize);
 }
 var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
 function loadPage() {
     resizeCanvas();
 
-    initAudio();
     initGame();
 
     drawContext.imageSmoothingEnabled = false;
@@ -145,7 +139,6 @@ function doStep() {
     }
 }
 function putDown() { // положить фигура
-    playSound("./sounds/drop.wav");
     // "положить" фигуру на поле
     var i, j;
     for (i = 0; i < 3; ++i)
@@ -175,7 +168,6 @@ var clearAnimateTime = 0;
 var clearingRows = [];
 function checkFilled() {
     var cnt = 0;
-    var isNeedPlayClearSound = false;
     for (var i = N - 2; i > 1; i--) {
         var isFullLine = true;
         var isEmptyLine = true;
@@ -196,12 +188,9 @@ function checkFilled() {
                 for(var j=1;j<M-1;j++)
                     board[i][j]=0;
                 clearingRows.push(new ClearAnimInfo(i));
-                isNeedPlayClearSound = true;
             }
         }
     }
-    if (isNeedPlayClearSound)
-        playSound("./sounds/clear.wav");
 }
 function animateRemoval()
 {
@@ -268,7 +257,6 @@ function tryMove(figure, di, dj) {
     movedFigure.i += di;
     movedFigure.j += dj;
     if (checkOverlap(movedFigure) == false) {
-        //playSound("./sounds/move.wav");
         figure.i = movedFigure.i;
         figure.j = movedFigure.j;
         return true;
@@ -380,20 +368,6 @@ function drawInfo() {
     if (nextFigure.isTop())    fy += 0.5 * cellSize;
     if (nextFigure.isBottom()) fy -= 0.5 * cellSize;
     drawFigure( nextFigure, fx, fy);
-
-    soundButtonRect.x = x + cellSize;
-    soundButtonRect.y = boardRect.y2() - cellSize;
-    drawMyRect( soundButtonRect.x, soundButtonRect.y, soundButtonRect.w, soundButtonRect.h );
-    if ( soundsOn )
-        drawContext.drawImage(resources.get("img/icons.png"),
-            0, 0, 64, 64,
-            soundButtonRect.x, soundButtonRect.y,
-            soundButtonRect.w, soundButtonRect.h);
-    else
-        drawContext.drawImage(resources.get("img/icons.png"),
-            64, 0, 64, 64,
-            soundButtonRect.x, soundButtonRect.y,
-            soundButtonRect.w, soundButtonRect.h);
 }
 
 function drawFigure(figure, x, y) {
@@ -513,13 +487,6 @@ function keyDown() {
             } break;
     }
 }
-var MB_LEFT = 1;
-function mouseDown() {
-    //if (event.button == MB_LEFT)
-    //nextMove = MOVE.ROTATE;
-    if ( soundButtonRect.isContain(event.pageX,event.pageY))
-        changeSoundState();
-}
 function setGameState(gs)
 {
     if ( gameState != gs )
@@ -533,7 +500,6 @@ function setGameState(gs)
                 break;
             case GAME_STATE.PLAY:
                 nextFigure = new Figure();
-                playSound("./sounds/music.mp3",true);
                 break;
             case GAME_STATE.PAUSE:
                 animRect = new AnimatedRect(
@@ -543,12 +509,4 @@ function setGameState(gs)
         }
         gameState = gs;
     }
-}
-function changeSoundState()
-{
-    soundsOn = !soundsOn;
-    if ( soundsOn )
-        playSound("./sounds/music.mp3",true);
-    else
-        stopSound("./sounds/music.mp3");
 }
