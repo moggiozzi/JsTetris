@@ -449,8 +449,13 @@ function draw() {
                 drawMyRect( animRect.currRect.x, animRect.currRect.y, animRect.currRect.w, animRect.currRect.h, bgColor3 );
                 drawContext.globalAlpha = 1;
                 if ( animRect.isAnimFinish() ) {
-                    drawText("Game", boardRect.cx() - 2 * cellSize, boardRect.cy() - 3 * cellSize, cellSize);
-                    drawText("Over", boardRect.cx() - 2 * cellSize, boardRect.cy() - 2 * cellSize, cellSize);
+                    var txt;
+                    if ( speed > 1)
+                        txt = new Array("Good","game");
+                    else
+                        txt = new Array("Game","over");
+                    drawText(txt[0], boardRect.cx() - 2 * cellSize, boardRect.cy() - 3 * cellSize, cellSize);
+                    drawText(txt[1], boardRect.cx() - 2 * cellSize, boardRect.cy() - 2 * cellSize, cellSize);
                     drawText("Result", boardRect.cx() - 3 * cellSize, boardRect.cy() + 1 * cellSize, cellSize);
                     drawText(score.toString(),
                         boardRect.cx() - score.toString().length / 2 * cellSize,
@@ -530,6 +535,7 @@ function setGameState(gs)
                 animRect = new AnimatedRect(
                     new Rect(boardRect.cx(), boardRect.cy(), 0, 0),
                     new Rect(boardRect.cx() - 3.5 * cellSize, boardRect.cy() - 4 * cellSize, 7 * cellSize, 8 * cellSize));
+                stopSound("./sounds/music.mp3",true);
                 break;
             case GAME_STATE.PLAY:
                 nextFigure = new Figure();

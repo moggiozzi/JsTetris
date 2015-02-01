@@ -15,3 +15,4 @@ REM del largeIcon.png
 rmdir /Q /S sounds
 rmdir /Q /S img
 rmdir /Q /S js
+cd ../
