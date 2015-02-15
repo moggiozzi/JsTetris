@@ -3,6 +3,7 @@ var M = 10; // количество столбцов
 var cellSize;
 var board;
 var boardRect, infoPanelWidth, cornerSize;
+var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
 var gameState;
 var nextFigure = new Figure();
 var currentFigure = nextFigure;
@@ -30,8 +31,6 @@ var bgColor4 = "#D0DBBD";
 
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27, BACK: 461, PAUSE: 19, HID_BACK: 8 };
 
-var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
-
 // Обработка потери фокуса страницей
 var hidden, visibilityChange;
 if (typeof document.hidden !== "undefined") {
@@ -48,10 +47,12 @@ document.addEventListener(visibilityChange, function() {
 }, true);
 
 // Обработка клавиши MRCU BACK
-window.history.pushState();
+var isNeedPause = true; // защита от двойного вызова паузы
+window.history.pushState({idx:2});
 window.addEventListener("popstate", function(inEvent) {
-    if ( gameState == GAME_STATE.PLAY )
+    if ( gameState == GAME_STATE.PLAY && isNeedPause )
         setGameState(GAME_STATE.PAUSE);
+    isNeedPause = true;
 });
 
 function resizeCanvas() {
@@ -417,49 +418,49 @@ function draw() {
     drawBoard();
     switch (gameState) {
         case GAME_STATE.MENU:
-            {
+        {
+            drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
+            drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
+            drawText("start", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
+        } break;
+        case GAME_STATE.PLAY:
+        {
+            drawFigure(currentFigure);
+            if (clearingRows.length > 0)
+                animateRemoval();
+        } break;
+        case GAME_STATE.PAUSE:
+        {
+            drawFigure(currentFigure);
+            animRect.next();
+            drawContext.globalAlpha = 0.8;
+            drawMyRect( animRect.currRect.x, animRect.currRect.y, animRect.currRect.w, animRect.currRect.h, bgColor3 );
+            drawContext.globalAlpha = 1;
+            if ( animRect.isAnimFinish() ) {
                 drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
                 drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
-                drawText("start", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
-            } break;
-        case GAME_STATE.PLAY:
-            {
-                drawFigure(currentFigure);
-                if (clearingRows.length > 0)
-                    animateRemoval();
-            } break;
-        case GAME_STATE.PAUSE:
-            {
-                drawFigure(currentFigure);
-                animRect.next();
-                drawContext.globalAlpha = 0.8;
-                drawMyRect( animRect.currRect.x, animRect.currRect.y, animRect.currRect.w, animRect.currRect.h, bgColor3 );
-                drawContext.globalAlpha = 1;
-                if ( animRect.isAnimFinish() ) {
-                    drawText("Press", myCanvas.width / 2 - 2.5 * cellSize, myCanvas.height / 2 - cellSize, cellSize);
-                    drawText("to", myCanvas.width / 2 - cellSize, myCanvas.height / 2, cellSize);
-                    drawText("resume", myCanvas.width / 2 - 3 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
-                }
-            } break;
+                drawText("resume", myCanvas.width / 2 - 3 * cellSize, myCanvas.height / 2 + cellSize, cellSize);
+            }
+        } break;
         case GAME_STATE.GAME_OVER:
-            {
-                animRect.next();
-                drawContext.globalAlpha = 0.8;
-                drawMyRect( animRect.currRect.x, animRect.currRect.y, animRect.currRect.w, animRect.currRect.h, bgColor3 );
-                drawContext.globalAlpha = 1;
-                if ( animRect.isAnimFinish() ) {
-                    drawText("Game", boardRect.cx() - 2 * cellSize, boardRect.cy() - 3 * cellSize, cellSize);
-                    drawText("Over", boardRect.cx() - 2 * cellSize, boardRect.cy() - 2 * cellSize, cellSize);
-                    drawText("Result", boardRect.cx() - 3 * cellSize, boardRect.cy() + 1 * cellSize, cellSize);
-                    drawText(score.toString(),
-                        boardRect.cx() - score.toString().length / 2 * cellSize,
-                        boardRect.cy() + 2 * cellSize, cellSize);
-                    //var str = "Record: " + bestScore;
-                    //drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2+30);
-                    if (score > bestScore)
-                        storage["bestScore"] = bestScore = score;
-                }
-            } break;
+        {
+            animRect.next();
+            drawContext.globalAlpha = 0.8;
+            drawMyRect( animRect.currRect.x, animRect.currRect.y, animRect.currRect.w, animRect.currRect.h, bgColor3 );
+            drawContext.globalAlpha = 1;
+            if ( animRect.isAnimFinish() ) {
+                drawText("Game", boardRect.cx() - 2 * cellSize, boardRect.cy() - 3 * cellSize, cellSize);
+                drawText("Over", boardRect.cx() - 2 * cellSize, boardRect.cy() - 2 * cellSize, cellSize);
+                drawText("Result", boardRect.cx() - 3 * cellSize, boardRect.cy() + 1 * cellSize, cellSize);
+                drawText(score.toString(),
+                    boardRect.cx() - score.toString().length / 2 * cellSize,
+                    boardRect.cy() + 2 * cellSize, cellSize);
+                //var str = "Record: " + bestScore;
+                //drawContext.fillText(str, myCanvas.width / 2, myCanvas.height / 2+30);
+                if (score > bestScore)
+                    storage["bestScore"] = bestScore = score;
+            }
+        } break;
     }
     drawInfo();
     if (animText != null) {
@@ -475,45 +476,45 @@ function draw() {
 function keyDown() {
     switch (gameState) {
         case GAME_STATE.MENU:
-            {
-                setGameState( GAME_STATE.PLAY );
-            } break;
+        {
+            setGameState( GAME_STATE.PLAY );
+        } break;
         case GAME_STATE.PLAY:
-            {
-                switch (event.keyCode) {
-                    case KEY.UP:
-                        nextMove = MOVE.ROTATE;
-                        break;
-                    case KEY.DOWN:
-                        nextMove = MOVE.DOWN;
-                        break;
-                    case KEY.LEFT:
-                        nextMove = MOVE.LEFT;
-                        break;
-                    case KEY.RIGHT:
-                        nextMove = MOVE.RIGHT;
-                        break;
-                    case KEY.SPACE:
-                    case KEY.ENTER:
-                        nextMove = MOVE.DROP;
-                        break;
-                    case KEY.ESC:
-                    case KEY.PAUSE:
-                    case KEY.BACK:
-                    case KEY.HID_BACK:
-                        setGameState( GAME_STATE.PAUSE );
-                        break;
-                }
-            } break;
+        {
+            switch (event.keyCode) {
+                case KEY.UP:
+                    nextMove = MOVE.ROTATE;
+                    break;
+                case KEY.DOWN:
+                    nextMove = MOVE.DOWN;
+                    break;
+                case KEY.LEFT:
+                    nextMove = MOVE.LEFT;
+                    break;
+                case KEY.RIGHT:
+                    nextMove = MOVE.RIGHT;
+                    break;
+                case KEY.SPACE:
+                case KEY.ENTER:
+                    nextMove = MOVE.DROP;
+                    break;
+                case KEY.ESC:
+                case KEY.PAUSE:
+                case KEY.BACK:
+                case KEY.HID_BACK:
+                    setGameState( GAME_STATE.PAUSE );
+                    break;
+            }
+        } break;
         case GAME_STATE.PAUSE:
         {
             setGameState( GAME_STATE.PLAY );
         }break;
         case GAME_STATE.GAME_OVER:
-            {
-                initGame();
-                setGameState( GAME_STATE.MENU );
-            } break;
+        {
+            initGame();
+            setGameState( GAME_STATE.MENU );
+        } break;
     }
 }
 function setGameState(gs)
@@ -529,7 +530,6 @@ function setGameState(gs)
                 break;
             case GAME_STATE.PLAY:
                 nextFigure = new Figure();
-                window.history.forward();
                 break;
             case GAME_STATE.PAUSE:
                 animRect = new AnimatedRect(
@@ -538,5 +538,10 @@ function setGameState(gs)
                 break;
         }
         gameState = gs;
+        if (gameState == GAME_STATE.PLAY)
+        {
+            isNeedPause = false;
+            window.history.forward();
+        }
     }
 }
