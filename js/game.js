@@ -28,6 +28,10 @@ var bgColor2 = "#6B7353";
 var bgColor3 = "#C4CFA1";
 var bgColor4 = "#D0DBBD";
 
+var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27, BACK: 461, PAUSE: 19, HID_BACK: 8 };
+
+var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
+
 // Обработка потери фокуса страницей
 var hidden, visibilityChange;
 if (typeof document.hidden !== "undefined") {
@@ -70,7 +74,7 @@ function resizeCanvas() {
     cornerSize = Math.floor( cellSize/8 );
     drawContext.lineWidth = Math.ceil( cornerSize / 2 );
 }
-var GAME_STATE = { MENU: 0, PLAY: 1, PAUSE: 2, GAME_OVER: 3 };
+
 function loadPage() {
     resizeCanvas();
 
@@ -474,7 +478,7 @@ function draw() {
             animText = null;
     }
 }
-var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27, BACK: 461, PAUSE: 19, HID_BACK: 8 };
+
 function keyDown() {
     switch (gameState) {
         case GAME_STATE.MENU:
