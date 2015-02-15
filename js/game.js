@@ -28,6 +28,7 @@ var bgColor2 = "#6B7353";
 var bgColor3 = "#C4CFA1";
 var bgColor4 = "#D0DBBD";
 
+// Обработка потери фокуса страницей
 var hidden, visibilityChange;
 if (typeof document.hidden !== "undefined") {
     hidden = "hidden";
@@ -36,12 +37,25 @@ if (typeof document.hidden !== "undefined") {
     hidden = "webkitHidden";
     visibilityChange = "webkitvisibilitychange";
 }
-
 document.addEventListener(visibilityChange, function() {
     if (document[hidden]) {
         setGameState(GAME_STATE.PAUSE);
     }
 }, true);
+
+// Обработка клавиши MRCU BACK
+//window.history.pushState();
+//window.onpopstate = function(event) {
+//    if ( gameState == GAME_STATE.PLAY )
+//        setGameState(GAME_STATE.PAUSE);
+//};
+//
+//window.addEventListener("popstate", function(inEvent) {
+//    if ( gameState == GAME_STATE.PLAY )
+//        setGameState(GAME_STATE.PAUSE);
+//    //else
+//    //    history.back(); // выход
+//});
 
 function resizeCanvas() {
     myCanvas.width = window.innerWidth;
@@ -70,8 +84,7 @@ function loadPage() {
 function initGame() {
     storage = window.localStorage;
     bestScore = storage["bestScore"] || 0;
-
-    resources.load(["img/blocks.png","img/tetris.png","img/rem.png","img/font32.png","img/icons.png"]);
+    resources.load(["img/blocks.png","img/rem.png","img/font32.png"]);
 
     var i, j;
     board = new Array(N);
@@ -461,7 +474,7 @@ function draw() {
             animText = null;
     }
 }
-var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27 };
+var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27, BACK: 461, PAUSE: 19, HID_BACK: 8 };
 function keyDown() {
     switch (gameState) {
         case GAME_STATE.MENU:
@@ -484,9 +497,13 @@ function keyDown() {
                         nextMove = MOVE.RIGHT;
                         break;
                     case KEY.SPACE:
+                    case KEY.ENTER:
                         nextMove = MOVE.DROP;
                         break;
                     case KEY.ESC:
+                    case KEY.PAUSE:
+                    case KEY.BACK:
+                    case KEY.HID_BACK:
                         setGameState( GAME_STATE.PAUSE );
                         break;
                 }
