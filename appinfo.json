@@ -6,7 +6,7 @@
     "main": "index.html",
     "title": "Tetris",
     "icon": "icon.png",
-    "largeIcon": "largeIcon.png"
+    "largeIcon": "largeIcon.png",
     "appDescription": "Classic Tetris game. Enjoy it!",
     "splashBackground": "tetris_splash.png"
 }
