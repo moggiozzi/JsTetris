@@ -48,18 +48,11 @@ document.addEventListener(visibilityChange, function() {
 }, true);
 
 // Обработка клавиши MRCU BACK
-//window.history.pushState();
-//window.onpopstate = function(event) {
-//    if ( gameState == GAME_STATE.PLAY )
-//        setGameState(GAME_STATE.PAUSE);
-//};
-//
-//window.addEventListener("popstate", function(inEvent) {
-//    if ( gameState == GAME_STATE.PLAY )
-//        setGameState(GAME_STATE.PAUSE);
-//    //else
-//    //    history.back(); // выход
-//});
+window.history.pushState();
+window.addEventListener("popstate", function(inEvent) {
+    if ( gameState == GAME_STATE.PLAY )
+        setGameState(GAME_STATE.PAUSE);
+});
 
 function resizeCanvas() {
     myCanvas.width = window.innerWidth;
@@ -536,6 +529,7 @@ function setGameState(gs)
                 break;
             case GAME_STATE.PLAY:
                 nextFigure = new Figure();
+                window.history.forward();
                 break;
             case GAME_STATE.PAUSE:
                 animRect = new AnimatedRect(
