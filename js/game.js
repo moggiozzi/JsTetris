@@ -28,6 +28,21 @@ var bgColor2 = "#6B7353";
 var bgColor3 = "#C4CFA1";
 var bgColor4 = "#D0DBBD";
 
+var hidden, visibilityChange;
+if (typeof document.hidden !== "undefined") {
+    hidden = "hidden";
+    visibilityChange = "visibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+    hidden = "webkitHidden";
+    visibilityChange = "webkitvisibilitychange";
+}
+
+document.addEventListener(visibilityChange, function() {
+    if (document[hidden]) {
+        setGameState(GAME_STATE.PAUSE);
+    }
+}, true);
+
 function resizeCanvas() {
     myCanvas.width = window.innerWidth;
     myCanvas.height = window.innerHeight;
