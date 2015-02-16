@@ -29,7 +29,7 @@ var bgColor2 = "#6B7353";
 var bgColor3 = "#C4CFA1";
 var bgColor4 = "#D0DBBD";
 
-var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27, BACK: 461, PAUSE: 19, HID_BACK: 8 };
+var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27, BACK: 461, PAUSE: 19, HID_BACK: 8, HOME: 1537, SHAKE: 1536 };
 
 // Обработка потери фокуса страницей
 var hidden, visibilityChange;
@@ -47,12 +47,13 @@ document.addEventListener(visibilityChange, function() {
 }, true);
 
 // Обработка клавиши MRCU BACK
-var isNeedPause = true; // защита от двойного вызова паузы
-window.history.pushState({idx:2});
+var isPageBack = true;
+window.history.pushState();
 window.addEventListener("popstate", function(inEvent) {
-    if ( gameState == GAME_STATE.PLAY && isNeedPause )
+    if ( gameState == GAME_STATE.PLAY && isPageBack )
         setGameState(GAME_STATE.PAUSE);
-    isNeedPause = true;
+    isPageBack = true;
+    score = 999;
 });
 
 function resizeCanvas() {
@@ -474,6 +475,8 @@ function draw() {
 }
 
 function keyDown() {
+    if (event.keyCode == KEY.SHAKE)
+        return;
     switch (gameState) {
         case GAME_STATE.MENU:
         {
@@ -502,6 +505,7 @@ function keyDown() {
                 case KEY.PAUSE:
                 case KEY.BACK:
                 case KEY.HID_BACK:
+                case KEY.HOME:
                     setGameState( GAME_STATE.PAUSE );
                     break;
             }
@@ -540,8 +544,10 @@ function setGameState(gs)
         gameState = gs;
         if (gameState == GAME_STATE.PLAY)
         {
-            isNeedPause = false;
+            isPageBack = false;
             window.history.forward();
         }
+        else
+            window.history.back();
     }
 }

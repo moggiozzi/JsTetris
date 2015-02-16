@@ -1,12 +1,15 @@
 {
-    "id": "arboro1012",
-    "version": "1.0.12",
+    "id": "arboro1013",
+    "version": "1.0.13",
     "vendor": "Arboro",
     "type": "web",
     "main": "index.html",
     "title": "Tetris",
-    "icon": "icon.png",
-    "largeIcon": "largeIcon.png",
+    "icon": "icon80.png",
+    "largeIcon": "icon130.png",
     "appDescription": "Classic Tetris game. Enjoy it!",
-    "splashBackground": "tetris_splash.png"
+    "splashBackground": "bgImage.png",
+    "bgImage": "bgImage.png",
+	"bgColor": "#d0dbbd",
+	"iconColor": "#343829"
 }
