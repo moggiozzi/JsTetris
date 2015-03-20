@@ -471,6 +471,42 @@ function draw() {
     }
 }
 
+var MB_LEFT = 0;
+function mouseDown() {
+    if (event.button != MB_LEFT)
+        return;
+    switch (gameState) {
+        case GAME_STATE.MENU:{
+            setGameState(GAME_STATE.PLAY);
+        }break;
+        case GAME_STATE.PLAY:{
+            var w = myCanvas.width;
+            var h = myCanvas.height;
+            var x = event.pageX;
+            var y = event.pageY;
+            var l1 = h - h/w*x - y;
+            var l2 = h/w*x - y;
+            if (l1>=0 && l2 >=0) // up
+                nextMove = MOVE.ROTATE;
+            if (l1>=0 && l2<0) // left
+                nextMove = MOVE.LEFT;
+            if (l1<0 && l2<0) // down
+                nextMove = MOVE.DROP;
+            if (l1<0 && l2>=0) // right
+                nextMove = MOVE.RIGHT;
+        }break;
+        case GAME_STATE.PAUSE:
+        {
+            setGameState( GAME_STATE.PLAY );
+        }break;
+        case GAME_STATE.GAME_OVER:
+        {
+            initGame();
+            setGameState( GAME_STATE.MENU );
+        } break;
+    }
+}
+
 function keyDown() {
     if (event.keyCode == KEY.SHAKE)
         return;
