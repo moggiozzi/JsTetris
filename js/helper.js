@@ -170,3 +170,21 @@ function drawTextInRect(str, rect) {
             gw, gh);
     }
 }
+
+var MY_BUTTON_DIR = { RIGHT:0, DOWN:1, LEFT:2, UP:3 };
+var MY_BUTTON_STATE = { NORMAL:0, OVER:1, PRESSED:2 };
+function MyButton(direction){
+    this.buttonState = MY_BUTTON_STATE.NORMAL;
+    this.buttonDir = direction;
+}
+
+function drawTriangle(ctx, x1, y1, x2, y2, x3, y3) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x3, y3);
+    ctx.lineTo(x1, y1);
+    ctx.closePath();
+    //ctx.stroke();
+    ctx.fill();
+}

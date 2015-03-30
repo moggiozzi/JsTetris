@@ -29,6 +29,8 @@ var bgColor2 = "#6B7353";
 var bgColor3 = "#C4CFA1";
 var bgColor4 = "#D0DBBD";
 
+var myButtons = [];
+
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27, BACK: 461, PAUSE: 19, HID_BACK: 8, SHAKE: 1536 };
 
 // Обработка потери фокуса страницей
@@ -80,7 +82,7 @@ function loadPage() {
 function initGame() {
     storage = window.localStorage;
     bestScore = storage["bestScore"] || 0;
-    resources.load(["img/blocks.png","img/rem.png","img/font32.png"]);
+    resources.load(["img/blocks.png","img/rem.png","img/font32.png","img/button.png"]);
 
     var i, j;
     board = new Array(N);
@@ -102,6 +104,12 @@ function initGame() {
     speed = 1.0;
     score = 0;
     nextMove = 0;
+
+    //myButtons = new Array[4];
+    myButtons.push( new MyButton(0) );
+    myButtons.push( new MyButton(1) );
+    myButtons.push( new MyButton(2) );
+    myButtons.push( new MyButton(3) );
 
     setGameState( GAME_STATE.MENU );
 }
@@ -469,6 +477,7 @@ function draw() {
         if (animText.isAnimFinish())
             animText = null;
     }
+    drawButtons();
 }
 
 var MB_LEFT = 0;
@@ -579,4 +588,34 @@ function setGameState(gs)
         else
             window.history.back();
     }
+}
+
+function drawButtons(){
+    var b = new MyButton(MY_BUTTON_DIR.RIGHT);
+    var frameIdx = b.buttonState;
+    //drawContext.drawImage(resources.get("img/button.png"),
+    //    frameIdx * 32, 0, 64, 64,
+    //    boardRect.x+k*cellSize, boardRect.y + clearingRows[i].row * cellSize,
+    //    cellSize, cellSize);
+    // normal: bgColor1, bgColor2
+    // over  : bgColor3, bgColor4
+    // press : bgColor3, bgColor2
+    // right
+    var c1 = drawContext.fillStyle = bgColor1;
+    var c2 = drawContext.fillStyle = bgColor2;
+    var x = boardRect.x2() - cellSize;
+    var y = boardRect.cy() - 1.5 * cellSize;
+    drawTriangle(drawContext, x, y, x + 1.5 * cellSize, y + 1.5 * cellSize, x, y + 3 * cellSize);
+    //down
+    x = boardRect.cx() - 1.5 * cellSize;
+    y = boardRect.y2() - cellSize;
+    drawTriangle(drawContext, x, y, x + 1.5 * cellSize, y + 1.5 * cellSize, x + 3 * cellSize, y);
+    //left
+    x = boardRect.x + cellSize;
+    y = boardRect.cy() - 1.5 * cellSize;
+    drawTriangle(drawContext, x, y, x - 1.5 * cellSize, y + 1.5 * cellSize, x, y + 3 * cellSize);
+    //up
+    x = boardRect.cx() - 1.5 * cellSize;
+    y = boardRect.y;
+    drawTriangle(drawContext, x, y, x + 1.5 * cellSize, y - 1.5 * cellSize, x + 3 * cellSize, y);
 }
