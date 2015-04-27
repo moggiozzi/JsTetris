@@ -23,7 +23,13 @@
         }
     </style>
 </head>
-<body onload="loadPage()" onkeydown="keyDown()" onmousedown="mouseDown()" onresize="resizeCanvas()">
+<body onload="loadPage()"
+      onkeydown="keyDown()"
+      onkeyup="keyUp()"
+      onmousedown="mouseDown()"
+      onmouseup="mouseUp()"
+      onmousemove="mouseMove()"
+      onresize="resizeCanvas()">
     <canvas id='myCanvas' height='1080' width='1920'>Not support</canvas>
     <script src="./js/helper.js"></script>
     <script src="./js/resources.js"></script>

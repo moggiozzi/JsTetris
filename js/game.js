@@ -17,6 +17,7 @@ var score = 0;
 var bestScore = 0;
 var scoreBoard;
 
+var DIRECTION = { RIGHT: 0, DOWN: 1, LEFT: 2, UP: 3 };
 var MOVE = { LEFT: 1, RIGHT: 2, DOWN: 3, MOVE: 4, DROP: 5 };
 var nextMove = 0;
 var myCanvas = document.getElementById("myCanvas");
@@ -32,6 +33,11 @@ var bgColor4 = "#D0DBBD";
 var myButtons = [];
 
 var KEY = { UP: 38, DOWN: 40, LEFT: 37, RIGHT: 39, ENTER: 13, SPACE: 32, ESC: 27, BACK: 461, PAUSE: 19, HID_BACK: 8, SHAKE: 1536 };
+var isUpDown = false;
+var isRightDown = false;
+var isDownDown = false;
+var isLeftDown = false;
+var isMouseMove = false;
 
 // Обработка потери фокуса страницей
 var hidden, visibilityChange;
@@ -484,17 +490,33 @@ var MB_LEFT = 0;
 function mouseDown() {
     if (event.button != MB_LEFT)
         return;
+    var w = myCanvas.width;
+    var h = myCanvas.height;
+    var x = event.pageX;
+    var y = event.pageY;
+    var l1 = h - h/w*x - y;
+    var l2 = h/w*x - y;
+    if (l1>=0 && l2 >=0) // up
+    {
+        isUpDown = true;
+    }
+    if (l1>=0 && l2<0) // left
+    {
+        isLeftDown = true;
+    }
+    if (l1<0 && l2<0) // down
+    {
+        isDownDown = true;
+    }
+    if (l1<0 && l2>=0) // right
+    {
+        isRightDown = true;
+    }
     switch (gameState) {
         case GAME_STATE.MENU:{
             setGameState(GAME_STATE.PLAY);
         }break;
         case GAME_STATE.PLAY:{
-            var w = myCanvas.width;
-            var h = myCanvas.height;
-            var x = event.pageX;
-            var y = event.pageY;
-            var l1 = h - h/w*x - y;
-            var l2 = h/w*x - y;
             if (l1>=0 && l2 >=0) // up
                 nextMove = MOVE.ROTATE;
             if (l1>=0 && l2<0) // left
@@ -516,9 +538,17 @@ function mouseDown() {
     }
 }
 
+function mouseUp(){
+    isUpDown = false;
+    isRightDown = false;
+    isDownDown = false;
+    isLeftDown = false;
+}
+
 function keyDown() {
     if (event.keyCode == KEY.SHAKE)
         return;
+    isMouseMove = false;
     switch (gameState) {
         case GAME_STATE.MENU:
         {
@@ -529,15 +559,19 @@ function keyDown() {
             switch (event.keyCode) {
                 case KEY.UP:
                     nextMove = MOVE.ROTATE;
+                    isUpDown = true;
                     break;
                 case KEY.DOWN:
                     nextMove = MOVE.DOWN;
+                    isDownDown = true;
                     break;
                 case KEY.LEFT:
                     nextMove = MOVE.LEFT;
+                    isLeftDown = true;
                     break;
                 case KEY.RIGHT:
                     nextMove = MOVE.RIGHT;
+                    isRightDown = true;
                     break;
                 case KEY.SPACE:
                 case KEY.ENTER:
@@ -560,6 +594,23 @@ function keyDown() {
             initGame();
             setGameState( GAME_STATE.MENU );
         } break;
+    }
+}
+function keyUp()
+{
+    switch (event.keyCode) {
+        case KEY.UP:
+            isUpDown = false;
+            break;
+        case KEY.DOWN:
+            isDownDown = false;
+            break;
+        case KEY.LEFT:
+            isLeftDown = false;
+            break;
+        case KEY.RIGHT:
+            isRightDown = false;
+            break;
     }
 }
 function setGameState(gs)
@@ -590,32 +641,75 @@ function setGameState(gs)
     }
 }
 
+var mouseX;
+var mouseY;
+function mouseMove(){
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+    isMouseMove = true;
+}
 function drawButtons(){
-    var b = new MyButton(MY_BUTTON_DIR.RIGHT);
-    var frameIdx = b.buttonState;
-    //drawContext.drawImage(resources.get("img/button.png"),
-    //    frameIdx * 32, 0, 64, 64,
-    //    boardRect.x+k*cellSize, boardRect.y + clearingRows[i].row * cellSize,
-    //    cellSize, cellSize);
-    // normal: bgColor1, bgColor2
-    // over  : bgColor3, bgColor4
-    // press : bgColor3, bgColor2
+    var w = myCanvas.width;
+    var h = myCanvas.height;
+    var x = mouseX;
+    var y = mouseY;
+    var l1 = h - h/w*x - y;
+    var l2 = h/w*x - y;
+
+    var b = new MyButton(DIRECTION.RIGHT);
+    var frameIdx = 0;//b.buttonState;
     // right
-    var c1 = drawContext.fillStyle = bgColor1;
-    var c2 = drawContext.fillStyle = bgColor2;
-    var x = boardRect.x2() - cellSize;
-    var y = boardRect.cy() - 1.5 * cellSize;
-    drawTriangle(drawContext, x, y, x + 1.5 * cellSize, y + 1.5 * cellSize, x, y + 3 * cellSize);
+    if (isMouseMove && l1<0 && l2>=0) // right
+        frameIdx = 1 + isRightDown;
+    else
+        frameIdx = 0;
+    var x = boardRect.x2();
+    var y = boardRect.cy();
+    drawButton(drawContext,frameIdx,DIRECTION.RIGHT,x,y,1);
     //down
-    x = boardRect.cx() - 1.5 * cellSize;
-    y = boardRect.y2() - cellSize;
-    drawTriangle(drawContext, x, y, x + 1.5 * cellSize, y + 1.5 * cellSize, x + 3 * cellSize, y);
+    if (isMouseMove && l1<0 && l2<0) // down
+        frameIdx = 1 + isDownDown;
+    else
+        frameIdx = 0;
+    x = boardRect.cx();
+    y = boardRect.y2();
+    drawButton(drawContext,frameIdx,DIRECTION.DOWN,x,y,1);
     //left
-    x = boardRect.x + cellSize;
-    y = boardRect.cy() - 1.5 * cellSize;
-    drawTriangle(drawContext, x, y, x - 1.5 * cellSize, y + 1.5 * cellSize, x, y + 3 * cellSize);
+    if (isMouseMove && l1>=0 && l2<0) // left
+        frameIdx = 1 + isLeftDown;
+    else
+        frameIdx = 0;
+    x = boardRect.x;
+    y = boardRect.cy();
+    drawButton(drawContext,frameIdx,DIRECTION.LEFT,x,y,1);
     //up
-    x = boardRect.cx() - 1.5 * cellSize;
-    y = boardRect.y;
-    drawTriangle(drawContext, x, y, x + 1.5 * cellSize, y - 1.5 * cellSize, x + 3 * cellSize, y);
+    if (isMouseMove && l1>=0 && l2 >=0) // up
+        frameIdx = 1 + isUpDown;
+    else
+        frameIdx = 0;
+    x = boardRect.cx();
+    y = boardRect.y - cellSize;
+    drawButton(drawContext,frameIdx,DIRECTION.UP,x,y,1);
+}
+
+function drawButton(ctx, frameIdx, dir, cx, cy, k )
+{
+    ctx.save();
+    ctx.translate(cx,cy);
+    switch (dir){
+        case 1:
+            ctx.rotate(90*Math.PI/180);
+            break;
+        case 2:
+            ctx.rotate(180*Math.PI/180);
+            break;
+        case 3:
+            ctx.rotate(270*Math.PI/180);
+            break;
+    }
+    ctx.translate(-cx,-cy);
+    ctx.drawImage(resources.get("img/button.png"),
+        frameIdx * 32, 0, 32, 64,
+        cx - 16*k, cy - 32*k, 32, 64 );
+    ctx.restore();
 }

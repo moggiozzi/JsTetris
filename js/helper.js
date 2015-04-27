@@ -171,7 +171,6 @@ function drawTextInRect(str, rect) {
     }
 }
 
-var MY_BUTTON_DIR = { RIGHT:0, DOWN:1, LEFT:2, UP:3 };
 var MY_BUTTON_STATE = { NORMAL:0, OVER:1, PRESSED:2 };
 function MyButton(direction){
     this.buttonState = MY_BUTTON_STATE.NORMAL;
