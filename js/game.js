@@ -80,6 +80,9 @@ function loadPage() {
 
     initGame();
 
+    drawContext.mozImageSmoothingEnabled = false;
+    drawContext.webkitImageSmoothingEnabled = false;
+    drawContext.msImageSmoothingEnabled = false;
     drawContext.imageSmoothingEnabled = false;
 
     setInterval(doStep, 1000 / (2 * MAX_SPEED));
@@ -663,8 +666,8 @@ function drawButtons(){
         frameIdx = 1 + isRightDown;
     else
         frameIdx = 0;
-    var x = boardRect.x2();
-    var y = boardRect.cy();
+    x = boardRect.x2();
+    y = boardRect.cy();
     drawButton(drawContext,frameIdx,DIRECTION.RIGHT,x,y,k);
     //down
     if (isMouseMove && l1<0 && l2<0) // down
@@ -695,7 +698,7 @@ function drawButtons(){
 function drawButton(ctx, frameIdx, dir, cx, cy, k )
 {
     ctx.save();
-    ctx.translate(cx,cy);
+    ctx.translate(Math.ceil(cx),Math.ceil(cy));
     switch (dir){
         case 1:
             ctx.rotate(90*Math.PI/180);
@@ -707,9 +710,9 @@ function drawButton(ctx, frameIdx, dir, cx, cy, k )
             ctx.rotate(270*Math.PI/180);
             break;
     }
-    ctx.translate(-cx,-cy);
+    ctx.translate(Math.ceil(-cx),Math.ceil(-cy));
     ctx.drawImage(resources.get("img/button.png"),
-        frameIdx * 32, 0, 32, 64,
+        frameIdx * (32+1), 0, 32, 64,
         Math.ceil(cx - 16 * k), Math.ceil(cy - 32 * k), Math.ceil(32 * k), Math.ceil(64 * k) );
     ctx.restore();
 }

@@ -152,7 +152,7 @@ function drawText(str, x, y, size) {
         var frameIdx = Math.floor( str.charCodeAt(i) % 16 );
         var frameRow = Math.floor( str.charCodeAt(i) / 16 );
         drawContext.drawImage(resources.get("img/font32.png"),
-            frameIdx * 32, frameRow * 32, 32, 32,
+            frameIdx * 33, frameRow * 33, 32, 32,
             x + i * size, y,
             size, size);
     }
@@ -165,7 +165,7 @@ function drawTextInRect(str, rect) {
         var frameIdx = Math.floor(str.charCodeAt(i) % 16);
         var frameRow = Math.floor(str.charCodeAt(i) / 16);
         drawContext.drawImage(resources.get("img/font32.png"),
-            frameIdx * 32, frameRow * 32, 32, 32,
+            frameIdx * 33, frameRow * 33, 32, 32,
             rect.x + i * gw, rect.y,
             gw, gh);
     }
