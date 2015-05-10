@@ -320,12 +320,12 @@ function tryTurn(figure) {
     return false;
 }
 
-function drawBlock(idx, x, y) {
+function drawBlock(idx, x, y, w, h) {
     var BLOCK_SIZE = 64;
     var i = idx-1;
     drawContext.drawImage(resources.get("img/blocks.png"),
         i * BLOCK_SIZE, 0, BLOCK_SIZE, BLOCK_SIZE,
-        x, y, cellSize, cellSize);
+        x, y, w, h);
 }
 
 function drawBoard() {
@@ -655,7 +655,7 @@ function drawButtons(){
     var y = mouseY;
     var l1 = h - h/w*x - y;
     var l2 = h/w*x - y;
-
+    var k = cellSize/24.0; //scale
     var b = new MyButton(DIRECTION.RIGHT);
     var frameIdx = 0;//b.buttonState;
     // right
@@ -665,7 +665,7 @@ function drawButtons(){
         frameIdx = 0;
     var x = boardRect.x2();
     var y = boardRect.cy();
-    drawButton(drawContext,frameIdx,DIRECTION.RIGHT,x,y,1);
+    drawButton(drawContext,frameIdx,DIRECTION.RIGHT,x,y,k);
     //down
     if (isMouseMove && l1<0 && l2<0) // down
         frameIdx = 1 + isDownDown;
@@ -673,7 +673,7 @@ function drawButtons(){
         frameIdx = 0;
     x = boardRect.cx();
     y = boardRect.y2();
-    drawButton(drawContext,frameIdx,DIRECTION.DOWN,x,y,1);
+    drawButton(drawContext,frameIdx,DIRECTION.DOWN,x,y,k);
     //left
     if (isMouseMove && l1>=0 && l2<0) // left
         frameIdx = 1 + isLeftDown;
@@ -681,7 +681,7 @@ function drawButtons(){
         frameIdx = 0;
     x = boardRect.x;
     y = boardRect.cy();
-    drawButton(drawContext,frameIdx,DIRECTION.LEFT,x,y,1);
+    drawButton(drawContext,frameIdx,DIRECTION.LEFT,x,y,k);
     //up
     if (isMouseMove && l1>=0 && l2 >=0) // up
         frameIdx = 1 + isUpDown;
@@ -689,7 +689,7 @@ function drawButtons(){
         frameIdx = 0;
     x = boardRect.cx();
     y = boardRect.y - cellSize;
-    drawButton(drawContext,frameIdx,DIRECTION.UP,x,y,1);
+    drawButton(drawContext,frameIdx,DIRECTION.UP,x,y,k);
 }
 
 function drawButton(ctx, frameIdx, dir, cx, cy, k )
@@ -710,6 +710,6 @@ function drawButton(ctx, frameIdx, dir, cx, cy, k )
     ctx.translate(-cx,-cy);
     ctx.drawImage(resources.get("img/button.png"),
         frameIdx * 32, 0, 32, 64,
-        cx - 16*k, cy - 32*k, 32, 64 );
+        Math.ceil(cx - 16 * k), Math.ceil(cy - 32 * k), Math.ceil(32 * k), Math.ceil(64 * k) );
     ctx.restore();
 }
